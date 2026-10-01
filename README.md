@@ -38,6 +38,7 @@ Repo **Settings → Pages → Deploy from a branch**, then choose your branch an
 
 - `index.html`: the four screens
 - `styles.css`: drifting fog, chrome script titles, the profile card, pearls and filigree
+- `assets/doily.png`: the lace doily turning behind the title screen
 - `frames/`: your theme artwork and the design template
 - `js/frames.js`: print layout, the frame list and the renderer
 - `js/filters.js`: photo filters (baked into the print)

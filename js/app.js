@@ -100,27 +100,6 @@
   $('#dialog').addEventListener('click', (e) => { if (e.target.id === 'dialog') closeDialog(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#dialog').hidden) closeDialog(); });
 
-  /* ───────── lace doily behind the logo ───────── */
-  function drawDoily() {
-    const r = 300, ring = (n, rad, fn) => Array.from({ length: n }, (_, i) => fn((i / n) * Math.PI * 2, rad)).join('');
-    const at = (a, rad) => [r + Math.cos(a) * rad, r + Math.sin(a) * rad].map((v) => v.toFixed(1));
-    const deg = (a) => (a * 180 / Math.PI).toFixed(1);
-    const holes =
-      ring(72, 268, (a, d) => { const [x, y] = at(a, d); return `<circle cx="${x}" cy="${y}" r="4"/>`; }) +
-      ring(36, 236, (a, d) => { const [x, y] = at(a, d); return `<ellipse cx="${x}" cy="${y}" rx="8" ry="16" transform="rotate(${deg(a)} ${x} ${y})"/>`; }) +
-      ring(48, 200, (a, d) => { const [x, y] = at(a, d); return `<circle cx="${x}" cy="${y}" r="6"/>`; }) +
-      ring(16, 150, (a, d) => { const [x, y] = at(a, d); return `<ellipse cx="${x}" cy="${y}" rx="14" ry="34" transform="rotate(${deg(a) + 90} ${x} ${y})"/>`; }) +
-      ring(24, 104, (a, d) => { const [x, y] = at(a, d); return `<circle cx="${x}" cy="${y}" r="5"/>`; }) +
-      `<circle cx="${r}" cy="${r}" r="70"/>`;
-    const scallops = ring(80, 282, (a, d) => { const [x, y] = at(a, d); return `<circle cx="${x}" cy="${y}" r="12"/>`; });
-    const lace = scallops + `<circle cx="${r}" cy="${r}" r="282"/>` +
-      ring(40, 70, (a, d) => { const [x, y] = at(a, d); return `<circle cx="${x}" cy="${y}" r="9"/>`; });
-    $('#doily').innerHTML =
-      `<svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg"><defs><mask id="doily-holes">` +
-      `<g fill="#fff">${lace}</g><g fill="#000">${holes}</g></mask></defs>` +
-      `<rect width="600" height="600" fill="currentColor" mask="url(#doily-holes)"/></svg>`;
-  }
-  drawDoily();
 
   /* ───────── frame select: a character-profile screen ───────── */
   function renderThemes() {
