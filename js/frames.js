@@ -23,33 +23,19 @@ window.KB = window.KB || {};
   })();
   const PHOTO_ASPECT = 4 / 5; // width / height of each photo
 
-  // Placeholder themes: rename them and add your overlay PNGs when ready.
+  // Frames are designed as 1080×1350 PNGs (see frames/README.md). The colour
+  // fields are only used for the drawn fallback if a PNG fails to load.
+  // `footer: false` means the art fills the bottom strip, so the booth
+  // doesn't write a caption or date there.
   const THEMES = {
-    one: {
-      name: 'Theme I', jp: '壱', overlay: 'frames/theme-1.png',
+    window: {
+      name: "Doll's Window", jp: '人形の窓', overlay: 'frames/theme-1.png', footer: false,
       bg: '#0b0a0d', pattern: 'crosses', pc: 'rgba(239,233,242,.06)',
       lace: '#efe9f2', ink: '#efe9f2', sub: '#b7afc0', line: '#c9c3d3',
       slotA: '#26222c', slotB: '#100e13',
     },
-    two: {
-      name: 'Theme II', jp: '弐', overlay: 'frames/theme-2.png',
-      bg: '#24101f', pattern: 'damask', pc: 'rgba(227,169,192,.1)',
-      lace: '#f2d3e0', ink: '#f6dbe8', sub: '#d79ab4', line: '#e3a9c0',
-      slotA: '#45213a', slotB: '#1a0b16',
-    },
-    three: {
-      name: 'Theme III', jp: '参', overlay: 'frames/theme-3.png',
-      bg: '#f4f0f2', pattern: 'dots', pc: 'rgba(27,20,32,.07)',
-      lace: '#1b1420', ink: '#1b1420', sub: '#6d6178', line: '#1b1420',
-      slotA: '#e4dee6', slotB: '#c9c0cf',
-    },
-    four: {
-      name: 'Theme IV', jp: '肆', overlay: 'frames/theme-4.png',
-      bg: '#15142c', pattern: 'stars', pc: 'rgba(214,214,255,.16)',
-      lace: '#dcd8ff', ink: '#e8e5ff', sub: '#a9a6dc', line: '#b4b8ef',
-      slotA: '#2c2a52', slotB: '#100f22',
-    },
   };
+
 
   // Load any overlay PNGs that exist; re-render when one arrives.
   function loadOverlays(onReady) {
@@ -273,7 +259,7 @@ window.KB = window.KB || {};
 
   /* ───────── main renderer ───────── */
   function renderStrip(canvas, o) {
-    const t = THEMES[o.theme] || THEMES.one;
+    const t = THEMES[o.theme] || Object.values(THEMES)[0];
     const s = o.scale || 1;
     const W = PRINT.w, H = PRINT.h;
     canvas.width = Math.round(W * s);
@@ -311,7 +297,7 @@ window.KB = window.KB || {};
       c.restore();
     }
 
-    drawFooter(c, t, o);
+    if (t.footer !== false) drawFooter(c, t, o);
 
     (o.stickers || []).forEach((st, i) => {
       c.save();

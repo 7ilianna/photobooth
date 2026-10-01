@@ -8,7 +8,7 @@
   const ROMAN = ['I', 'II', 'III', 'IV'];
 
   const state = {
-    theme: 'one',
+    theme: Object.keys(THEMES)[0],
     filter: 'digicam',
     timer: 3,
     shots: [],          // raw 3:4 canvases, mirrored like a mirror
@@ -74,6 +74,7 @@
   function renderThemes() {
     const grid = $('#theme-grid');
     grid.innerHTML = '';
+    grid.classList.toggle('single', Object.keys(THEMES).length === 1);
     Object.entries(THEMES).forEach(([id, t], i) => {
       const b = document.createElement('button');
       b.type = 'button';
@@ -352,6 +353,8 @@
   function enterResult() {
     ensureFiltered();
     renderThemeSwatches();
+    $('#theme-control').hidden = Object.keys(THEMES).length < 2;
+    syncCaptionControl();
     renderChips($('#result-filter-chips'), filterItems(), (v) => v === state.filter, (v) => {
       state.filter = v;
       ensureFiltered();
@@ -363,6 +366,11 @@
     renderStickerPalette();
     syncStickerEdit();
     drawResult();
+  }
+
+  // Frames whose art fills the bottom strip have no caption or date
+  function syncCaptionControl() {
+    $('#caption-control').hidden = THEMES[state.theme].footer === false;
   }
 
   function renderThemeSwatches() {
@@ -381,6 +389,7 @@
       b.addEventListener('click', () => {
         state.theme = id;
         el.querySelectorAll('.swatch').forEach((x) => pressed(x, x === b));
+        syncCaptionControl();
         drawResult();
       });
       el.append(b);

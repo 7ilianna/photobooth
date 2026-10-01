@@ -5,7 +5,7 @@ A dark gothic lolita photobooth that runs in your browser: think a 2000s game ti
 ## How it works
 
 1. **Title screen**: press START (or hit Enter).
-2. **Select Theme** (`#/themes`): pick one of four themes. Every print is a 1080×1350 Instagram post (4:5) with four photos, two on top and two on the bottom.
+2. **Select Theme** (`#/themes`): pick a frame (currently *Doll's Window*). Every print is a 1080×1350 Instagram post (4:5) with four photos, two on top and two on the bottom.
 3. **Shoot** (`#/booth`): choose a filter (Natural, Digicam, Faded, Monochrome, Lilac, Rosé, Dreamy) and a timer, then strike four poses.
    Tap a thumbnail to retake just that one, or upload photos instead of using the camera.
 4. **Print** (`#/result`): switch theme or filter, write a caption, add an orange digicam date stamp, add stickers
@@ -16,8 +16,8 @@ Everything stays on your device. No photos are uploaded anywhere.
 
 ## Designing your own themes
 
-The four themes are placeholders for now. See [`frames/README.md`](frames/README.md): design on top of `frames/template.png`,
-export a transparent PNG and save it as `frames/theme-1.png` … `theme-4.png`.
+See [`frames/README.md`](frames/README.md): design on top of `frames/template.png`, export a transparent 1080×1350 PNG,
+and add it to `frames/` plus the `THEMES` list in `js/frames.js`.
 
 ## Run it locally
 
@@ -39,7 +39,7 @@ Repo **Settings → Pages → Deploy from a branch**, then choose your branch an
 - `index.html`: the four screens
 - `styles.css`: the night sky, glossy script titles, pearls and filigree
 - `frames/`: your theme artwork and the design template
-- `js/frames.js`: print layout, the four themes and the renderer
+- `js/frames.js`: print layout, the frame list and the renderer
 - `js/filters.js`: photo filters (baked into the print)
 - `js/stickers.js`: vector stickers
 - `js/app.js`: router, camera, booth, sticker editing and download

@@ -56,7 +56,7 @@
       <div class="panel">
         <p class="eyebrow">Chapter I · テーマをえらんでね</p>
         <h2 class="section-title">Select Theme</h2>
-        <p class="sub">Four poses, two on top and two on the bottom, sized for an Instagram post. Pick your frame, darling.</p>
+        <p class="sub">Four poses, two on top and two on the bottom, sized for an Instagram post. More frames coming soon, darling.</p>
         <div class="pearl-row" aria-hidden="true"></div>
         <div id="theme-grid" class="theme-grid"></div>
         <div class="actions">
@@ -122,21 +122,21 @@
           <h2 class="section-title">Your Print</h2>
           <div class="pearl-row" aria-hidden="true"></div>
 
-          <div class="control">
-            <span class="control-label">Theme <small>テーマ</small></span>
+          <div id="theme-control" class="control">
+            <span class="control-label">Frame <small>フレーム</small></span>
             <div id="theme-swatches" class="swatches"></div>
           </div>
 
           <div class="control">
             <span class="control-label">Filter <small>フィルター</small></span>
             <div id="result-filter-chips" class="chips"></div>
+            <label class="check"><input id="show-stamp" type="checkbox"> digicam date stamp on photos</label>
           </div>
 
-          <div class="control">
+          <div id="caption-control" class="control">
             <label class="control-label" for="caption">Caption <small>ひとこと</small></label>
             <input id="caption" class="text-input" type="text" maxlength="22" autocomplete="off">
             <label class="check"><input id="show-date" type="checkbox" checked> print today's date</label>
-            <label class="check"><input id="show-stamp" type="checkbox"> digicam date stamp on photos</label>
           </div>
 
           <div class="control">

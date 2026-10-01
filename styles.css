@@ -403,6 +403,7 @@ main {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 22px;
 }
+.theme-grid.single { grid-template-columns: minmax(0, 340px); justify-content: center; }
 .theme-card {
   display: flex;
   flex-direction: column;
