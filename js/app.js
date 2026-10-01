@@ -102,23 +102,28 @@
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#dialog').hidden) closeDialog(); });
 
 
-  /* ───────── frame select: a tarot reading ───────── */
-  // Each art frame is a face-down card. The deck deals itself into a fan,
-  // you turn one over, and the deck tells your fortune. Plain sits underneath.
+  /* ───────── frame select: a lace-covered diary ───────── */
+  // The diary opens to one spread per frame: a dated entry on the left and the
+  // frame's photograph on the right. Pages turn in 3D; Plain sits underneath.
   const deckIds = Object.keys(THEMES).filter((id) => !THEMES[id].plain);
   const plainId = Object.keys(THEMES).find((id) => THEMES[id].plain);
-  const table = $('#tarot-table');
+  const N = deckIds.length;
+  const diary = $('#diary');
+  const leaf = $('#leaf');
+  const pageL = $('#page-left');
+  const pageR = $('#page-right');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const single = () => window.matchMedia('(max-width: 720px)').matches;
   const isPlain = () => !!THEMES[state.theme].plain;
   const wait = (ms) => new Promise((r) => setTimeout(r, reduceMotion ? 0 : ms));
-  const DEAL_NOTES = [1318.5, 1568.0, 1760.0, 2093.0, 2349.3, 2637.0];
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const ordinal = (n) => { const s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+  const TILTS = [-2.5, 1.8, -1.2, 2.2];
 
-  let cards = {};          // frame id → card element
-  let order = [];          // left-to-right order of the fan, reshuffled on request
-  let chosen = null;       // the face-up card
-  let picked = false;      // has anything been chosen yet?
-  let dealing = false;
-  let mode = 'deck';
+  let spread = 0;        // which frame's spread is open
+  let opened = false;    // has the cover been opened?
+  let picked = false;    // has anything been chosen yet?
+  let turning = false;
 
   // One chime per action, however fast things happen
   let lastChime = 0;
@@ -129,167 +134,134 @@
     sound.chime();
   }
 
-  function shuffled(list) {
-    const a = [...list];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
+  function entryDate(i) {
+    const d = new Date();
+    d.setDate(d.getDate() - (N - i) * 9);
+    return `the ${ordinal(d.getDate())} of ${MONTHS[d.getMonth()]}`;
+  }
+
+  function entryHTML(i) {
+    const t = THEMES[deckIds[i]];
+    return `<div class="entry">
+        <p class="entry-date">${entryDate(i)}</p>
+        <p class="entry-dear">Dear diary,</p>
+        <p class="entry-text">${t.bio || ''}</p>
+        <p class="entry-ps">P.S. ${t.fortune || ''}</p>
+        <span class="entry-bow" aria-hidden="true"></span>
+        <span class="page-num">${2 * i + 1}</span>
+      </div>`;
+  }
+
+  function photoHTML(i) {
+    const id = deckIds[i], t = THEMES[id];
+    const chosen = picked && state.theme === id;
+    return `<div class="photo-page${chosen ? ' is-chosen' : ''}">
+        <p class="entry-date entry-mini">${entryDate(i)}</p>
+        <figure class="photo" style="--tilt:${TILTS[i % TILTS.length]}deg">
+          <span class="photo-tape" aria-hidden="true"></span>
+          <canvas data-theme="${id}" aria-hidden="true"></canvas>
+          <span class="pc pc-tl"></span><span class="pc pc-tr"></span><span class="pc pc-bl"></span><span class="pc pc-br"></span>
+          <span class="photo-flash" aria-hidden="true"></span>
+        </figure>
+        <p class="photo-cap"><b>${t.name}</b><i>${t.tagline || ''}</i></p>
+        <p class="entry-ps entry-mini">P.S. ${t.fortune || ''}</p>
+        <button class="choose-btn" type="button" data-choose="${id}" aria-pressed="${chosen}">${chosen ? 'chosen ♡' : 'choose this photograph'}</button>
+        <span class="bookmark" aria-hidden="true"></span>
+        <span class="stamp" aria-hidden="true">chosen</span>
+        <span class="page-num">${2 * i + 2}</span>
+      </div>`;
+  }
+
+  function setPage(el, html) {
+    el.innerHTML = html;
+    el.querySelectorAll('canvas[data-theme]').forEach((cv) => {
+      renderStrip(cv, { theme: cv.dataset.theme, scale: 0.24, caption: state.caption, showDate: false });
+    });
+    el.querySelectorAll('[data-choose]').forEach((b) => b.addEventListener('click', () => choosePhoto(b.dataset.choose)));
+  }
+
+  function showSpread(i) {
+    setPage(pageL, entryHTML(i));
+    setPage(pageR, photoHTML(i));
+    $('#page-no').textContent = `photograph ${i + 1} of ${N}`;
+    $('#page-prev').disabled = i === 0;
+    $('#page-next').disabled = i === N - 1;
+  }
+
+  async function openDiary() {
+    if (opened) return;
+    opened = true;
+    showSpread(spread);
+    diary.dataset.state = 'opening';
+    [1046.5, 1318.5, 1568.0].forEach((f, k) => sound.note(f, k * 0.16));
+    await wait(1400);
+    diary.dataset.state = 'open';
+    speak(picked && !isPlain()
+      ? `You chose ${THEMES[state.theme].name}. Turn the pages if your heart has changed…`
+      : 'Turn the pages, darling. Choose the photograph you like best…');
+  }
+  $('#book-cover').addEventListener('click', openDiary);
+
+  // Turn one page forwards (d = 1) or backwards (d = -1)
+  async function turn(d) {
+    const to = spread + d;
+    if (turning || !opened || to < 0 || to >= N) return;
+    turning = true;
+    sound.note(d > 0 ? 1568.0 : 1318.5);
+    const one = single();
+    const front = leaf.querySelector('.leaf-front');
+    const back = leaf.querySelector('.leaf-back');
+    leaf.className = `leaf ${one ? 'one' : d > 0 ? 'fwd' : 'bwd'}`;
+    let from = 'rotateY(0deg)', target;
+    if (one) {
+      if (d > 0) { setPage(front, photoHTML(spread)); back.innerHTML = ''; setPage(pageR, photoHTML(to)); target = 'rotateY(-180deg)'; }
+      else { setPage(front, photoHTML(to)); back.innerHTML = ''; from = 'rotateY(-180deg)'; target = 'rotateY(0deg)'; }
+    } else if (d > 0) {
+      setPage(front, photoHTML(spread)); setPage(back, entryHTML(to)); setPage(pageR, photoHTML(to)); target = 'rotateY(-180deg)';
+    } else {
+      setPage(front, entryHTML(spread)); setPage(back, photoHTML(to)); setPage(pageL, entryHTML(to)); target = 'rotateY(180deg)';
     }
-    return a;
+    leaf.style.transform = from;
+    leaf.hidden = false;
+    void leaf.offsetWidth;
+    leaf.classList.add('is-turning');
+    leaf.style.transform = target;
+    await wait(1000);
+    spread = to;
+    showSpread(to);
+    leaf.hidden = true;
+    leaf.classList.remove('is-turning');
+    turning = false;
+    speak(THEMES[deckIds[to]].fortune);
   }
+  $('#page-prev').addEventListener('click', () => turn(-1));
+  $('#page-next').addEventListener('click', () => turn(1));
+  diary.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); turn(-1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); turn(1); }
+  });
+  let swipeX = null;
+  $('#book').addEventListener('pointerdown', (e) => { swipeX = e.clientX; });
+  $('#book').addEventListener('pointerup', (e) => {
+    if (swipeX === null) return;
+    const dx = e.clientX - swipeX;
+    swipeX = null;
+    if (Math.abs(dx) > 50) turn(dx < 0 ? 1 : -1);
+  });
 
-  function buildDeck() {
-    table.innerHTML = '';
-    cards = {};
-    deckIds.forEach((id, n) => {
-      const t = THEMES[id];
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'tcard';
-      b.dataset.id = id;
-      b.setAttribute('aria-label', 'A face-down card');
-      b.innerHTML =
-        '<span class="tcard-inner">' +
-          '<span class="tcard-face tcard-back" aria-hidden="true"><span class="tcard-doily"></span><span class="tcard-emblem"></span><span class="tcard-mark">Bisque</span><span class="tcard-glare"></span></span>' +
-          `<span class="tcard-face tcard-front"><span class="tcard-num">${ROMAN[n]}</span><canvas aria-hidden="true"></canvas><span class="tcard-name">${t.name}</span><span class="tcard-glare"></span></span>` +
-        '</span>';
-      b.addEventListener('click', () => choose(id));
-      b.addEventListener('pointermove', tilt);
-      b.addEventListener('pointerleave', untilt);
-      table.append(b);
-      cards[id] = b;
-    });
-    paintCards();
-  }
-
-  function paintCards() {
-    for (const id of deckIds) {
-      renderStrip(cards[id].querySelector('canvas'), { theme: id, scale: 0.2, caption: state.caption, showDate: false });
-    }
-    document.querySelectorAll('.plain-opt').forEach((b) => {
-      renderStrip(b.querySelector('canvas'), { theme: plainId, tone: b.dataset.plain, scale: 0.1, caption: state.caption, showDate: false });
-    });
-  }
-
-  // Put every card where it belongs for the current moment of the reading
-  function place(m) {
-    mode = m;
-    const w = table.querySelector('.tcard')?.offsetWidth || 190;
-    const n = order.length, mid = (n - 1) / 2;
-    const spread = Math.min(w * 1.08, (table.offsetWidth - w) / Math.max(1, n - 1));
-    const others = order.filter((id) => id !== chosen);
-    order.forEach((id, i) => {
-      const b = cards[id];
-      let x = 0, y = 0, r = 0, s = 1, z = i + 1;
-      if (m === 'deck') {
-        x = (i - mid) * 3; y = -i * 3; r = (i - mid) * 2;
-      } else if (m === 'riffle') {
-        x = (Math.random() - 0.5) * w * 1.3; y = (Math.random() - 0.5) * 30; r = (Math.random() - 0.5) * 30; z = Math.ceil(Math.random() * n);
-      } else if (chosen && id === chosen) {
-        y = -14; s = 1.14; z = 50;
-      } else if (chosen) {
-        const k = others.indexOf(id), half = Math.ceil(others.length / 2);
-        const side = k < half ? -1 : 1, step = k < half ? half - k : k - half + 1;
-        x = side * (spread * 0.95 + (step - 1) * spread * 0.45); y = 46; r = side * 12; s = 0.84; z = 10 - step;
-      } else {
-        const k = i - mid;
-        x = k * spread; y = Math.abs(k) * 18; r = k * 7;
-      }
-      b.style.setProperty('--x', `${x.toFixed(1)}px`);
-      b.style.setProperty('--y', `${y.toFixed(1)}px`);
-      b.style.setProperty('--r', `${r.toFixed(1)}deg`);
-      b.style.setProperty('--s', s.toFixed(3));
-      b.style.zIndex = String(z);
-      const up = id === chosen;
-      b.classList.toggle('is-up', up);
-      b.classList.toggle('is-dim', !!chosen && !up && m === 'spread');
-      b.setAttribute('aria-label', up ? `${THEMES[id].name}, chosen` : 'A face-down card');
-      b.setAttribute('aria-pressed', up ? 'true' : 'false');
-    });
-  }
-
-  // Gather, optionally riffle, then deal into a fan with a note per card
-  async function deal({ reshuffle = false, reveal = null } = {}) {
-    if (dealing) return;
-    dealing = true;
-    table.classList.add('is-dealing');
-    if (chosen) { chosen = null; place('spread'); await wait(520); }
-    place('deck');
-    await wait(560);
-    if (reshuffle) {
-      speak('Shuffling… the deck is thinking.');
-      for (let k = 0; k < 3; k++) {
-        place('riffle'); sound.note(DEAL_NOTES[k] / 2);
-        await wait(240);
-        place('deck');
-        await wait(200);
-      }
-      order = shuffled(deckIds);
-      place('deck');
-      await wait(300);
-    }
-    order.forEach((id, i) => {
-      cards[id].style.setProperty('--delay', `${reduceMotion ? 0 : i * 0.12}s`);
-      sound.note(DEAL_NOTES[i % DEAL_NOTES.length], reduceMotion ? 0 : i * 0.12);
-    });
-    place('spread');
-    await wait(order.length * 120 + 750);
-    order.forEach((id) => cards[id].style.removeProperty('--delay'));
-    table.classList.remove('is-dealing');
-    dealing = false;
-    if (reveal) choose(reveal);
-    else speak(picked ? 'The cards are dealt. Choose again, if you dare…' : 'Pick a card, any card. The deck already knows which frame is yours…');
-  }
-
-  function choose(id) {
-    if (dealing || chosen === id) return;
-    untilt({ currentTarget: cards[id] });
+  function choosePhoto(id) {
     picked = true;
-    chosen = id;
     state.theme = id;
-    place('spread');
     syncPlainButtons();
     renderProfile();
-    speak(THEMES[id].fortune);
-    setTimeout(() => burst(cards[id]), reduceMotion ? 0 : 420);
+    setPage(pageR, photoHTML(spread));
+    const ph = pageR.querySelector('.photo');
+    if (ph && !reduceMotion) ph.classList.add('is-flash');
+    sound.shutter();
+    speak(`${THEMES[id].name}… a lovely choice. The camera is ready whenever you are ♡`);
   }
 
-  // A shower of sparkles from the card that was turned over
-  function burst(el) {
-    if (reduceMotion) return;
-    const tr = table.getBoundingClientRect(), r = el.getBoundingClientRect();
-    const cx = r.left - tr.left + r.width / 2, cy = r.top - tr.top + r.height / 2;
-    const glyphs = ['✦', '✧', '♡', '✝', '✦', '·'];
-    for (let i = 0; i < 18; i++) {
-      const s = document.createElement('span');
-      s.className = 'spark';
-      s.textContent = glyphs[i % glyphs.length];
-      const a = (i / 18) * Math.PI * 2 + Math.random() * 0.4;
-      const d = 90 + Math.random() * 110;
-      s.style.cssText = `left:${cx}px;top:${cy}px;--dx:${(Math.cos(a) * d).toFixed(0)}px;--dy:${(Math.sin(a) * d).toFixed(0)}px;--rot:${(Math.random() * 360).toFixed(0)}deg;font-size:${(12 + Math.random() * 14).toFixed(0)}px`;
-      table.append(s);
-      setTimeout(() => s.remove(), 1100);
-    }
-  }
-
-  // Cards lean towards the cursor, with a foil glare that follows it
-  function tilt(e) {
-    if (e.pointerType !== 'mouse' || dealing) return;
-    const b = e.currentTarget, r = b.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
-    b.classList.add('is-tilting');
-    b.style.setProperty('--ry', `${((px - 0.5) * 26).toFixed(1)}deg`);
-    b.style.setProperty('--rx', `${((0.5 - py) * 20).toFixed(1)}deg`);
-    b.style.setProperty('--gx', `${(px * 100).toFixed(0)}%`);
-    b.style.setProperty('--gy', `${(py * 100).toFixed(0)}%`);
-  }
-  function untilt(e) {
-    const b = e.currentTarget;
-    b.classList.remove('is-tilting');
-    for (const v of ['--rx', '--ry', '--gx', '--gy']) b.style.removeProperty(v);
-  }
-
-  // The fortune types itself out like a PS2 dialogue box
+  // The diary speaks, like a PS2 dialogue box
   let speakToken = 0;
   function speak(text) {
     const token = ++speakToken;
@@ -309,27 +281,23 @@
   }
 
   function renderThemes() {
-    if (!table.children.length) buildDeck(); else paintCards();
-    if (!order.length) order = shuffled(deckIds);
-    const again = picked && !isPlain() ? state.theme : null;
-    chosen = null;
-    table.classList.add('no-anim');
-    place('deck');
-    void table.offsetWidth;
-    table.classList.remove('no-anim');
+    if (picked && !isPlain()) spread = deckIds.indexOf(state.theme);
+    if (opened) showSpread(spread);
+    diary.dataset.state = opened ? 'open' : 'closed';
+    document.querySelectorAll('.plain-opt').forEach((b) => {
+      renderStrip(b.querySelector('canvas'), { theme: plainId, tone: b.dataset.plain, scale: 0.1, caption: state.caption, showDate: false });
+    });
     syncPlainButtons();
     renderProfile();
-    if (isPlain() && picked) speak(THEMES[plainId].fortune);
-    deal({ reveal: again });
+    if (!opened) speak('A diary, tied with a silver ribbon. Open it, if you like…');
+    else if (picked) speak(isPlain() ? THEMES[plainId].fortune : `Welcome back. ${THEMES[state.theme].name} is still waiting for you ♡`);
   }
 
   function renderProfile() {
     const t = THEMES[state.theme];
     $('#profile').hidden = !picked;
     const toneName = state.tone === 'white' ? 'White' : 'Black';
-    $('#profile-no').textContent = t.plain
-      ? 'Plain frame'
-      : `Arcana ${ROMAN[deckIds.indexOf(state.theme)]} of ${ROMAN[deckIds.length - 1]}`;
+    $('#profile-no').textContent = t.plain ? 'Plain photograph' : `Photograph ${deckIds.indexOf(state.theme) + 1} of ${N}`;
     $('#profile-name').textContent = t.plain ? `Plain ${toneName}` : t.name;
     $('#profile-tagline').textContent = t.tagline || '';
     $('#profile-bio').textContent = t.bio || '';
@@ -353,21 +321,16 @@
     $('#coming-soon').hidden = !Object.values(THEMES).some((x) => x.placeholder && !x.image);
   }
 
-  $('#tarot-shuffle').addEventListener('click', () => deal({ reshuffle: true }));
-  window.addEventListener('resize', () => { if (current === 'themes' && !dealing) place(mode); });
-
-  // Plain Black / Plain White, under the cards
+  // Plain Black / Plain White, under the diary
   function syncPlainButtons() {
     const plain = isPlain() && picked;
     document.querySelectorAll('.plain-opt').forEach((b) => pressed(b, plain && b.dataset.plain === state.tone));
   }
   document.querySelectorAll('.plain-opt').forEach((b) => b.addEventListener('click', () => {
-    if (dealing) return;
     picked = true;
-    chosen = null;
     state.theme = plainId;
     state.tone = b.dataset.plain;
-    place('spread');
+    if (opened) setPage(pageR, photoHTML(spread));
     syncPlainButtons();
     renderProfile();
     speak(THEMES[plainId].fortune);
@@ -380,6 +343,34 @@
     if (current === 'result') drawResult();
   }
   document.querySelectorAll('[data-tone]').forEach((b) => b.addEventListener('click', () => setTone(b.dataset.tone)));
+
+  /* ───────── ribbons and lace scraps drifting through the fog ───────── */
+  (function spawnFloaters() {
+    if (reduceMotion) return;
+    const host = $('#floaters');
+    const kinds = ['bow', 'curl', 'lace', 'rosette', 'bow', 'lace', 'curl', 'rosette', 'bow'];
+    const count = window.innerWidth < 600 ? 9 : 18;
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement('span');
+      s.className = `floater f-${kinds[i % kinds.length]}`;
+      const r = Math.random;
+      s.style.cssText = [
+        `--x:${(r() * 100).toFixed(1)}vw`,
+        `--w:${(18 + r() * 34).toFixed(0)}px`,
+        `--dur:${(24 + r() * 28).toFixed(1)}s`,
+        `--delay:${(-r() * 50).toFixed(1)}s`,
+        `--sway:${((r() * 2 - 1) * (40 + r() * 70)).toFixed(0)}px`,
+        `--spin:${((r() < 0.5 ? -1 : 1) * (0.4 + r() * 1.1)).toFixed(2)}`,
+        `--o:${(0.45 + r() * 0.45).toFixed(2)}`,
+      ].join(';');
+      host.append(s);
+    }
+  })();
+
+  // The filament glows whenever the cursor is near something you can touch
+  document.addEventListener('pointerover', (e) => {
+    document.body.classList.toggle('is-sensing', !!e.target.closest('a, button, label, input, .photo, #result-canvas'));
+  });
 
   $('#profile-look').addEventListener('click', () => {
     const look = THEMES[state.theme].look;
@@ -588,8 +579,21 @@
     $('#btn-next').setAttribute('aria-disabled', busy || !ready() ? 'true' : 'false');
   }
 
+  const capCharge = $('#cap-charge');
+  const CIRC = 2 * Math.PI * 38;
+  capCharge.style.strokeDasharray = CIRC.toFixed(1);
+  capCharge.style.strokeDashoffset = CIRC.toFixed(1);
+
+  // Camera Obscura: the capture ring charges, then "Shutter Chance"
   async function countdown(n) {
     const el = $('#countdown');
+    const vf = $('.viewfinder');
+    vf.classList.add('is-charging');
+    capCharge.style.transition = 'none';
+    capCharge.style.strokeDashoffset = CIRC.toFixed(1);
+    void capCharge.getBoundingClientRect();
+    capCharge.style.transition = `stroke-dashoffset ${n}s linear`;
+    capCharge.style.strokeDashoffset = '0';
     el.hidden = false;
     for (let k = n; k > 0; k--) {
       el.textContent = k;
@@ -600,6 +604,18 @@
       if (!stream) break;
     }
     el.hidden = true;
+    if (stream) {
+      const sc = $('#shutter-chance');
+      sc.hidden = false;
+      sc.classList.remove('go');
+      void sc.offsetWidth;
+      sc.classList.add('go');
+      await sleep(450);
+      sc.hidden = true;
+    }
+    vf.classList.remove('is-charging');
+    capCharge.style.transition = 'stroke-dashoffset .5s ease';
+    capCharge.style.strokeDashoffset = CIRC.toFixed(1);
   }
 
   function flash() {
@@ -622,6 +638,7 @@
       state.shots[i] = grab(video, video.videoWidth, video.videoHeight, true);
       state.shotsVersion++;
       flash();
+      sound.shutter();
       renderTray();
       await sleep(800);
     }
@@ -923,13 +940,13 @@
   /* ───────── music-box chime on presses ───────── */
   document.addEventListener('click', (e) => {
     const el = e.target.closest('button, a[href], label.btn, input[type="checkbox"]');
-    if (!el || el.disabled || el.getAttribute('aria-disabled') === 'true' || el.id === 'sound-toggle') return;
+    if (!el || el.disabled || el.getAttribute('aria-disabled') === 'true' || el.classList.contains('sound-toggle') || el.matches('[data-choose]')) return;
     chime();
   }, true);
 
   const soundBtn = $('#sound-toggle');
   function syncSoundBtn() {
-    soundBtn.textContent = sound.on ? '♪ sound on' : '♪ sound off';
+    soundBtn.textContent = sound.on ? '♪ chimes on' : '♪ chimes off';
     pressed(soundBtn, sound.on);
   }
   soundBtn.addEventListener('click', () => {
@@ -938,6 +955,18 @@
     sound.chime();
   });
   syncSoundBtn();
+
+  const ambBtn = $('#ambience-toggle');
+  function syncAmbBtn() {
+    ambBtn.textContent = sound.ambience ? '☾ lullaby on' : '☾ lullaby off';
+    pressed(ambBtn, sound.ambience);
+  }
+  ambBtn.addEventListener('click', () => { sound.setAmbience(!sound.ambience); syncAmbBtn(); });
+  syncAmbBtn();
+  // Browsers only allow sound after a gesture, so the lullaby starts on the first touch
+  const wake = () => sound.startAmbience();
+  document.addEventListener('pointerdown', wake, { once: true });
+  document.addEventListener('keydown', wake, { once: true });
 
   /* ───────── boot ───────── */
   function refresh() {
@@ -952,8 +981,8 @@
   // Canvas text needs the web fonts loaded before it can use them.
   if (document.fonts && document.fonts.load) {
     Promise.all([
-      '118px "Mea Culpa"',
-      '600 18px "Cinzel"',
+      'italic 300 80px "Cormorant Garamond"',
+      '500 18px "Cormorant SC"',
       'italic 22px "Cormorant Garamond"',
       '30px "VT323"',
     ].map((f) => document.fonts.load(f, 'Bisque I II III IV 0123456789'))).then(refresh).catch(() => {});

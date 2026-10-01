@@ -249,7 +249,7 @@ window.KB = window.KB || {};
     c.save();
     c.globalAlpha = 0.6;
     c.fillStyle = t.lace;
-    c.font = `600 ${Math.round(sl.w * 0.055)}px "Cinzel", Georgia, serif`;
+    c.font = `500 ${Math.round(sl.w * 0.06)}px "Cormorant SC", Georgia, serif`;
     c.textAlign = 'left';
     c.fillText(['I', 'II', 'III', 'IV'][i], sl.x + 18, sl.y + sl.h - 20);
     c.restore();
@@ -296,7 +296,7 @@ window.KB = window.KB || {};
     c.fillStyle = t.ink;
     let size = 80;
     do {
-      c.font = `${size}px "Mea Culpa", "Pinyon Script", cursive`;
+      c.font = `italic 300 ${size}px "Cormorant Garamond", Georgia, serif`;
       size -= 4;
     } while (c.measureText(caption).width > PRINT.w - 240 && size > 30);
     c.fillText(caption, cx, y0 + 74);
@@ -343,7 +343,7 @@ window.KB = window.KB || {};
       c.fillStyle = t.sub;
       c.globalAlpha = 0.7;
       c.textAlign = 'left';
-      c.font = '600 13px "Cinzel", Georgia, serif';
+      c.font = '500 14px "Cormorant SC", Georgia, serif';
       c.fillText(`${t.name.toUpperCase()} · PLACEHOLDER`, 44, H - 42);
       c.restore();
     }

@@ -4,19 +4,29 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bisque Photobooth</title>
-  <meta name="description" content="Bisque — a dark gothic lolita photobooth. Lace, pearls, ribbons and filigree.">
-  <meta name="theme-color" content="#0c0812">
+  <meta name="description" content="Bisque — a porcelain-white gothic lolita photobooth. Lace, ribbons, fog and a camera that sees a little more than it should.">
+  <meta name="theme-color" content="#efeae3">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%80%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Mea+Culpa&family=Pinyon+Script&family=VT323&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Cormorant+SC:wght@400;500;600&family=VT323&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-screen="home">
   <div class="sky" aria-hidden="true"></div>
+  <div class="bloom" aria-hidden="true"></div>
+  <div class="curtain left" aria-hidden="true"></div>
+  <div class="curtain right" aria-hidden="true"></div>
+  <div id="floaters" class="floaters" aria-hidden="true"></div>
   <div class="grain" aria-hidden="true"></div>
-  <div class="sparkles" aria-hidden="true">
-    <span>✝</span><span>♡</span><span>✧</span><span>✠</span><span>✦</span><span>♱</span><span>✧</span><span>♡</span>
+  <div class="valance" aria-hidden="true"></div>
+
+  <!-- Camera Obscura: viewfinder corners and a filament that glows near anything you can touch -->
+  <div class="obscura" aria-hidden="true">
+    <span class="ob-corner tl"></span><span class="ob-corner tr"></span>
+    <span class="ob-corner bl"></span><span class="ob-corner br"></span>
+    <span class="ob-label">camera obscura · type-07</span>
+    <span class="ob-filament"><i></i>filament</span>
   </div>
 
   <header class="topbar">
@@ -27,7 +37,8 @@
       <a href="#/themes" data-step="themes"><b>I</b>frame</a>
       <a href="#/booth" data-step="booth"><b>II</b>shoot</a>
       <a href="#/result" data-step="result"><b>III</b>print</a>
-      <button id="sound-toggle" class="sound-toggle" type="button" aria-pressed="true">♪ sound on</button>
+      <button id="sound-toggle" class="sound-toggle" type="button" aria-pressed="true">♪ chimes on</button>
+      <button id="ambience-toggle" class="sound-toggle" type="button" aria-pressed="true">☾ lullaby on</button>
     </nav>
   </header>
 
@@ -66,20 +77,39 @@
         <h2 class="section-title">Select Frame</h2>
         <p class="sub">Four poses, two on top and two on the bottom, sized for an Instagram post.</p>
         <div class="pearl-row" aria-hidden="true"></div>
-        <div id="tarot" class="tarot">
-          <div id="tarot-table" class="tarot-table" role="group" aria-label="Face-down cards, one for each frame. Pick one."></div>
+        <div id="diary" class="diary" data-state="closed">
+          <div id="book" class="book">
+            <div id="page-left" class="page page-left"></div>
+            <div id="page-right" class="page page-right"></div>
+            <div id="leaf" class="leaf" hidden>
+              <div class="leaf-face leaf-front page"></div>
+              <div class="leaf-face leaf-back page"></div>
+            </div>
+            <span class="spine" aria-hidden="true"></span>
+            <button id="book-cover" class="book-cover" type="button" aria-label="Open the diary">
+              <span class="cover-quilt" aria-hidden="true"></span>
+              <span class="cover-doily" aria-hidden="true"></span>
+              <span class="cover-title" aria-hidden="true">a diary<em>of dolls</em></span>
+              <span class="cover-ribbon" aria-hidden="true"></span>
+              <span class="cover-bow" aria-hidden="true"></span>
+              <span class="cover-lock" aria-hidden="true"></span>
+              <span class="cover-hint" aria-hidden="true">tap to open</span>
+            </button>
+          </div>
+          <div class="diary-nav" id="diary-nav">
+            <button id="page-prev" class="page-btn" type="button">‹ previous page</button>
+            <span id="page-no" class="page-no"></span>
+            <button id="page-next" class="page-btn" type="button">next page ›</button>
+          </div>
         </div>
 
         <div id="fortune" class="fortune">
-          <span class="fortune-who">The Deck</span>
+          <span class="fortune-who">The Diary</span>
           <p class="fortune-text"><span id="fortune-typed" aria-hidden="true"></span><span id="fortune-full" class="sr-only" aria-live="polite"></span><b class="fortune-more" aria-hidden="true">▼</b></p>
-        </div>
-        <div class="tarot-actions">
-          <button id="tarot-shuffle" class="shuffle-btn" type="button">Shuffle again ✦</button>
         </div>
 
         <div class="plain-row">
-          <span class="plain-label">or skip fate and keep it plain</span>
+          <span class="plain-label">or tuck in a plain photograph</span>
           <button type="button" class="plain-opt" data-plain="black" aria-pressed="false"><canvas aria-hidden="true"></canvas><span>Plain Black</span></button>
           <button type="button" class="plain-opt" data-plain="white" aria-pressed="false"><canvas aria-hidden="true"></canvas><span>Plain White</span></button>
         </div>
@@ -101,7 +131,7 @@
         </div>
         <p class="coming-soon" id="coming-soon">more frames coming soon…</p>
         <div class="actions">
-          <a class="btn btn-primary btn-big" href="#/booth">To the booth ✝</a>
+          <a class="btn btn-primary btn-big" href="#/booth">To the booth ♡</a>
         </div>
       </div>
     </section>
@@ -118,12 +148,19 @@
               <p class="loading">Now Loading<span>.</span><span>.</span><span>.</span></p>
             </div>
             <div id="countdown" class="countdown" hidden></div>
+            <div id="shutter-chance" class="shutter-chance" hidden>Shutter Chance</div>
             <div id="shot-label" class="shot-label" hidden></div>
             <div id="flash" class="flash"></div>
             <span class="corner tl"></span><span class="corner tr"></span>
             <span class="corner bl"></span><span class="corner br"></span>
             <div class="hud" aria-hidden="true">
-              <span class="hud-reticle"></span>
+              <svg class="capture" viewBox="0 0 100 100">
+                <circle class="cap-track" cx="50" cy="50" r="38"/>
+                <circle id="cap-charge" class="cap-charge" cx="50" cy="50" r="38"/>
+                <circle class="cap-inner" cx="50" cy="50" r="30"/>
+                <path class="cap-cross" d="M50 44v12M44 50h12"/>
+              </svg>
+              <span class="hud-filament" id="hud-filament"><i></i>filament</span>
               <span class="hud-mode">Film · Type-07</span>
               <span class="hud-battery"><i></i><i></i><i></i></span>
               <span class="hud-film">Shots <b id="hud-count">4</b></span>
@@ -235,23 +272,24 @@
       <h2 id="dialog-title" class="section-title"></h2>
       <div class="pearl-row" aria-hidden="true"></div>
       <div id="dialog-body" class="dialog-body"></div>
-      <div class="actions"><button id="dialog-close" class="btn btn-ghost" type="button">Back ✝</button></div>
+      <div class="actions"><button id="dialog-close" class="btn btn-ghost" type="button">Back ♡</button></div>
     </div>
   </div>
 
   <template id="tpl-howto">
     <ol class="howto">
-      <li><b>Choose a frame.</b> Each one has its own profile, and a look it pairs best with.</li>
+      <li><b>Open the diary</b> and turn its pages. Each frame is an old photograph with its own entry. Choose the one you like best.</li>
       <li><b>Pick a filter</b> and slide its intensity, then choose a timer.</li>
-      <li><b>Press Start</b> and strike four poses. Tap any photo to retake it. No camera? Upload four photos instead.</li>
+      <li><b>Press Start</b> and hold still while the camera charges, then strike four poses. Tap any photo to retake it. No camera? Upload four photos instead.</li>
       <li><b>Decorate</b> with stickers and a digicam date, then save your 1080 × 1350 post.</li>
     </ol>
   </template>
   <template id="tpl-credits">
     <dl class="credit-roll">
       <div><dt>Frame art</dt><dd>you ♡</dd></div>
-      <div><dt>Lettering</dt><dd>Mea Culpa · Cinzel · Cormorant Garamond</dd></div>
-      <div><dt>Fog, lace &amp; pearls</dt><dd>hand-stitched in CSS</dd></div>
+      <div><dt>Lettering</dt><dd>Cormorant Garamond · Cormorant SC</dd></div>
+      <div><dt>Fog, lace &amp; ribbons</dt><dd>hand-stitched in CSS</dd></div>
+      <div><dt>Lullaby</dt><dd>a music box, played by the browser</dd></div>
       <div><dt>Your photos</dt><dd>never leave your device</dd></div>
     </dl>
     <p class="fine">Thank you for playing.</p>
