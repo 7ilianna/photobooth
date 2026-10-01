@@ -5,11 +5,11 @@ A gothic lolita × retro Tokyo kissaten photo booth that runs in your browser. L
 ## How it works
 
 1. **Menu** (`#/menu`): pick a *set* (Classic Strip, Trio, Duo or Postcard grid) and a *tablecloth* (frame):
-   Black Lace, Pearl Cream, Strawberry Parfait, Coffee Jelly, Bordeaux Rose or Melon Soda Velvet.
+   Requiem, Vampire Tea Party, Black Lace, Pearl Cream, Strawberry Parfait, Coffee Jelly, Bordeaux Rose or Melon Soda Velvet.
 2. **Booth** (`#/booth`): choose a filter (Natural, Kissaten, Noir, Rosé, Showa Film, Dreamy) and a timer,
    then strike your poses. Tap any thumbnail to retake that one, or upload photos instead of using the camera.
 3. **Print** (`#/result`): switch frames and filters, write a caption, add stickers (ribbons, hearts, crosses,
-   cherries, coffee, bats, roses, crowns…) and drag them around. Then download your strip as a PNG.
+   cherries, coffee, bats, roses, crowns, candles, coffins, moons…) and drag them around. Then download your strip as a PNG.
 
 Everything stays on your device. No photos are uploaded anywhere.
 

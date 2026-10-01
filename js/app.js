@@ -7,7 +7,7 @@
 
   const state = {
     layout: 'strip4',
-    frame: 'noir',
+    frame: 'requiem',
     filter: 'kissaten',
     timer: 3,
     shots: [],          // raw 4:3 canvases, mirrored like a mirror
@@ -572,10 +572,9 @@
   // Canvas text needs the web fonts loaded before it can use them.
   if (document.fonts && document.fonts.load) {
     Promise.all([
-      '64px "Pinyon Script"',
-      '20px "UnifrakturMaguntia"',
-      '17px "Kaisei Decol"',
-      'italic 20px "Cormorant Garamond"',
+      '600 64px "Grenze Gotisch"',
+      '17px "Zen Antique"',
+      'italic 20px "IM Fell English"',
     ].map((f) => document.fonts.load(f, '喫茶黒薔薇写真館 Kurobara 0123456789'))).then(() => {
       if (current === 'menu') renderMenu();
       if (current === 'result') drawResult();

@@ -43,6 +43,22 @@ window.KB = window.KB || {};
   const geometry = (id) => (GEOMETRY[id] || GEOMETRY.strip4)();
 
   const FRAMES = {
+    requiem: {
+      name: 'Requiem', jp: '鎮魂歌',
+      bg: '#09080a', pattern: 'crosses', pc: 'rgba(220,215,225,.07)',
+      lace: '#e9e6ec', text: '#ece8ef', sub: '#a39fab', line: '#c9c4cf',
+      bow: '#09080a', bowEdge: '#e9e6ec', topper: 'cross', crossEdge: '#c9c4cf',
+      arch: true, garland: true, pearlFrame: false,
+      slotA: '#24222a', slotB: '#0e0d11',
+    },
+    vampire: {
+      name: 'Vampire Tea Party', jp: '吸血鬼のお茶会',
+      bg: '#12030a', pattern: 'damask', pc: 'rgba(181,29,54,.16)',
+      lace: '#8e1428', text: '#f3dfe2', sub: '#e09aa6', line: '#b51d36',
+      bow: '#8e1428', bowEdge: '#f3dfe2', topper: 'bat',
+      arch: true, garland: true, pearlFrame: false,
+      slotA: '#3a0a16', slotB: '#12030a',
+    },
     noir: {
       name: 'Black Lace', jp: '黒レース',
       bg: '#150a0e', pattern: 'damask', pc: 'rgba(244,236,226,.07)',
@@ -110,6 +126,13 @@ window.KB = window.KB || {};
         break;
       case 'stripes':
         for (let x = 0; x < W; x += 26) c.fillRect(x, 0, 11, H);
+        break;
+      case 'crosses':
+        for (let y = 30, row = 0; y < H; y += 52, row++)
+          for (let x = row % 2 ? 52 : 26; x < W + 26; x += 52) {
+            c.fillRect(x - 1.5, y - 10, 3, 20);
+            c.fillRect(x - 7, y - 4.5, 14, 3);
+          }
         break;
       case 'damask':
         for (let y = 30, row = 0; y < H; y += 60, row++)
@@ -239,7 +262,7 @@ window.KB = window.KB || {};
     c.save();
     c.globalAlpha = 0.55;
     c.fillStyle = f.lace;
-    c.font = `${Math.round(sl.h * 0.08)}px "UnifrakturMaguntia", serif`;
+    c.font = `600 ${Math.round(sl.h * 0.085)}px "Grenze Gotisch", serif`;
     c.textAlign = 'left';
     c.fillText(`No.${i + 1}`, sl.x + sl.h * 0.05, sl.y + sl.h * 0.94);
     c.restore();
@@ -251,7 +274,32 @@ window.KB = window.KB || {};
     c.closePath(); c.fill();
   }
 
+  // Pointed chapel-window arch over a slot.
+  function archPath(c, x, y, w, h) {
+    const a = h * 0.42;
+    c.beginPath();
+    c.moveTo(x, y + h);
+    c.lineTo(x, y + a);
+    c.bezierCurveTo(x, y + a * 0.35, x + w * 0.28, y + a * 0.06, x + w / 2, y);
+    c.bezierCurveTo(x + w * 0.72, y + a * 0.06, x + w, y + a * 0.35, x + w, y + a);
+    c.lineTo(x + w, y + h);
+    c.closePath();
+  }
+
   function drawPhotoFrame(c, sl, f) {
+    if (f.arch) {
+      c.save();
+      c.strokeStyle = f.line;
+      c.lineWidth = 2;
+      archPath(c, sl.x - 6, sl.y - 6, sl.w + 12, sl.h + 12); c.stroke();
+      c.lineWidth = 1;
+      archPath(c, sl.x - 11, sl.y - 11, sl.w + 22, sl.h + 22); c.stroke();
+      c.fillStyle = f.line;
+      diamond(c, sl.x - 11, sl.y + sl.h + 11, 6);
+      diamond(c, sl.x + sl.w + 11, sl.y + sl.h + 11, 6);
+      c.restore();
+      return;
+    }
     if (f.pearlFrame) {
       pearlRect(c, sl.x - 8, sl.y - 8, sl.w + 16, sl.h + 16, 3.6);
       return;
@@ -297,11 +345,11 @@ window.KB = window.KB || {};
 
     const caption = (o.caption || '').trim() || 'Kurobara';
     c.fillStyle = f.text;
-    fitFont(c, caption, '"Pinyon Script", cursive', Math.round(64 * k), G.w - 120);
+    fitFont(c, caption, '"Grenze Gotisch", Georgia, serif', Math.round(68 * k), G.w - 120, '600');
     c.fillText(caption, cx, y0 + 114 * k);
 
     c.fillStyle = f.sub;
-    c.font = `${Math.round(17 * k)}px "Kaisei Decol", serif`;
+    c.font = `${Math.round(17 * k)}px "Zen Antique", serif`;
     const sub = '喫茶 黒薔薇 ・ 写真館';
     c.fillText(sub, cx, y0 + 152 * k);
     const sw = c.measureText(sub).width / 2 + 18 * k;
@@ -309,7 +357,7 @@ window.KB = window.KB || {};
     diamond(c, cx + sw, y0 + 146 * k, 4 * k);
 
     if (o.showDate) {
-      c.font = `italic ${Math.round(20 * k)}px "Cormorant Garamond", serif`;
+      c.font = `italic ${Math.round(20 * k)}px "IM Fell English", Georgia, serif`;
       c.fillText(`— ${formatDate(o.date || new Date())} —`, cx, y0 + 184 * k);
     }
     c.restore();
@@ -330,8 +378,11 @@ window.KB = window.KB || {};
 
     G.slots.forEach((sl, i) => {
       const img = o.shots && o.shots[i];
+      c.save();
+      if (f.arch) { archPath(c, sl.x, sl.y, sl.w, sl.h); c.clip(); }
       if (img) c.drawImage(img, sl.x, sl.y, sl.w, sl.h);
       else drawPlaceholder(c, sl, f, i);
+      c.restore();
       drawPhotoFrame(c, sl, f);
     });
 
@@ -339,8 +390,17 @@ window.KB = window.KB || {};
     if (f.garland) drawGarland(c, G.w, G);
 
     c.save();
-    c.translate(G.w / 2, G.slots[0].y - 2);
-    drawSticker(c, 'bow', 86 * G.k, { fill: f.bow, edge: f.bowEdge || f.lace });
+    const top = G.slots[0].y;
+    if (f.topper === 'cross') {
+      c.translate(G.w / 2, top - 16);
+      drawSticker(c, 'cross', 66 * G.k, { edge: f.crossEdge });
+    } else if (f.topper === 'bat') {
+      c.translate(G.w / 2, top - 8);
+      drawSticker(c, 'bat', 96 * G.k);
+    } else {
+      c.translate(G.w / 2, top - 2);
+      drawSticker(c, 'bow', 86 * G.k, { fill: f.bow, edge: f.bowEdge || f.lace });
+    }
     c.restore();
 
     drawFooter(c, f, G, o);

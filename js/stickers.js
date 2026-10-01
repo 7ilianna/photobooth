@@ -85,13 +85,13 @@ window.KB = window.KB || {};
 
     cross: {
       name: 'Cross',
-      draw(c) {
+      draw(c, o) {
         const pts = [[-8, -46], [8, -46], [8, -24], [30, -24], [30, -8], [8, -8], [8, 46], [-8, 46], [-8, -8], [-30, -8], [-30, -24], [-8, -24]];
         c.beginPath();
         pts.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y)));
         c.closePath();
         c.fillStyle = '#1b0a10'; c.fill();
-        c.lineWidth = 3; c.strokeStyle = '#c9a76a'; c.stroke();
+        c.lineWidth = 3; c.strokeStyle = (o && o.edge) || '#c9a76a'; c.stroke();
         for (const [x, y] of [[0, -46], [30, -16], [-30, -16], [0, 46]]) pearl(c, x, y, 6);
         c.beginPath(); c.arc(0, -16, 7, 0, TAU);
         c.fillStyle = '#8e1428'; c.fill(); c.lineWidth = 2.5; c.stroke();
@@ -233,6 +233,77 @@ window.KB = window.KB || {};
           c.beginPath(); c.arc(x, 20.5, 4.5, 0, TAU);
           c.fillStyle = col; c.fill();
         }
+      },
+    },
+
+    candle: {
+      name: 'Candle',
+      draw(c) {
+        const glow = c.createRadialGradient(0, -32, 2, 0, -32, 24);
+        glow.addColorStop(0, 'rgba(255,200,110,.55)');
+        glow.addColorStop(1, 'rgba(255,200,110,0)');
+        c.fillStyle = glow;
+        c.beginPath(); c.arc(0, -32, 24, 0, TAU); c.fill();
+        c.fillStyle = '#bdb6be'; c.strokeStyle = '#3a3540'; c.lineWidth = 3;
+        c.beginPath(); c.ellipse(0, 40, 26, 7, 0, 0, TAU); c.fill(); c.stroke();
+        c.fillStyle = '#f1e9dc';
+        roundRectPath(c, -11, -12, 22, 52, 3); c.fill(); c.stroke();
+        c.fillStyle = '#8e1428';
+        c.beginPath();
+        c.moveTo(-11, -9); c.lineTo(11, -9); c.lineTo(11, 2);
+        c.quadraticCurveTo(8, 6, 6, 1); c.lineTo(5, 14);
+        c.quadraticCurveTo(2, 18, -1, 14); c.lineTo(-2, 0);
+        c.quadraticCurveTo(-6, 8, -11, 3);
+        c.closePath(); c.fill();
+        c.strokeStyle = '#1b0a10'; c.lineWidth = 2.5;
+        c.beginPath(); c.moveTo(0, -12); c.lineTo(0, -20); c.stroke();
+        const fl = c.createLinearGradient(0, -46, 0, -20);
+        fl.addColorStop(0, '#ffb347'); fl.addColorStop(1, '#fff7d6');
+        c.fillStyle = fl;
+        c.beginPath();
+        c.moveTo(0, -48);
+        c.bezierCurveTo(12, -34, 10, -20, 0, -20);
+        c.bezierCurveTo(-10, -20, -12, -34, 0, -48);
+        c.fill();
+      },
+    },
+
+    coffin: {
+      name: 'Coffin',
+      draw(c) {
+        c.beginPath();
+        [[-16, -46], [16, -46], [28, -20], [18, 46], [-18, 46], [-28, -20]].forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y)));
+        c.closePath();
+        c.fillStyle = '#1b0a10'; c.fill();
+        c.lineWidth = 3; c.strokeStyle = '#e9e6ec'; c.stroke();
+        c.lineWidth = 4.5; c.lineCap = 'round';
+        c.beginPath(); c.moveTo(0, -32); c.lineTo(0, 8); c.moveTo(-11, -20); c.lineTo(11, -20); c.stroke();
+        c.save(); c.translate(0, 26); c.scale(.2, .2); heartPath(c);
+        c.fillStyle = '#e09aa6'; c.fill(); c.restore();
+      },
+    },
+
+    moon: {
+      name: 'Moon',
+      draw(c) {
+        c.save();
+        c.beginPath();
+        c.rect(-60, -60, 120, 120);
+        c.arc(20, -12, 34, 0, TAU, true);
+        c.clip();
+        c.beginPath(); c.arc(0, 0, 40, 0, TAU);
+        c.fillStyle = '#f3ead2'; c.fill();
+        c.lineWidth = 3; c.strokeStyle = '#6b5a3a'; c.stroke();
+        c.restore();
+        c.strokeStyle = '#6b5a3a'; c.lineWidth = 2.5; c.lineCap = 'round';
+        c.beginPath(); c.arc(-24, 2, 5, .15 * Math.PI, .85 * Math.PI); c.stroke();
+        c.fillStyle = '#f0a0b0';
+        c.beginPath(); c.ellipse(-27, 13, 4.5, 2.6, 0, 0, TAU); c.fill();
+        c.fillStyle = '#f3ead2'; c.strokeStyle = '#c9a76a'; c.lineWidth = 2;
+        c.beginPath();
+        c.moveTo(30, 18); c.quadraticCurveTo(32, 26, 40, 28); c.quadraticCurveTo(32, 30, 30, 38);
+        c.quadraticCurveTo(28, 30, 20, 28); c.quadraticCurveTo(28, 26, 30, 18);
+        c.fill(); c.stroke();
       },
     },
   };
