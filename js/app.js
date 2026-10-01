@@ -1,29 +1,29 @@
 (function () {
-  const { LAYOUTS, FRAMES, FILTERS, STICKERS, renderStrip, applyFilter, drawSticker, geometry } = window.KB;
+  const { THEMES, PRINT, PHOTO_ASPECT, FILTERS, STICKERS, renderStrip, applyFilter, drawSticker, loadOverlays } = window.KB;
 
   const $ = (s, r = document) => r.querySelector(s);
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  const SHOT_W = 960, SHOT_H = 720;
+  const COUNT = PRINT.slots.length;
+  const SHOT_H = 960, SHOT_W = Math.round(SHOT_H * PHOTO_ASPECT);
+  const ROMAN = ['I', 'II', 'III', 'IV'];
 
   const state = {
-    layout: 'strip4',
-    frame: 'kuro',
+    theme: 'one',
     filter: 'digicam',
     timer: 3,
-    shots: [],          // raw 4:3 canvases, mirrored like a mirror
+    shots: [],          // raw 3:4 canvases, mirrored like a mirror
     shotsVersion: 0,
     filtered: [],
     filteredKey: '',
     stickers: [],
     selected: -1,
-    caption: 'Dolly Noir',
-    stamp: false,
+    caption: 'Bisque',
     showDate: true,
+    stamp: false,
   };
 
-  const count = () => LAYOUTS[state.layout].count;
   const ready = () => {
-    for (let i = 0; i < count(); i++) if (!state.shots[i]) return false;
+    for (let i = 0; i < COUNT; i++) if (!state.shots[i]) return false;
     return true;
   };
 
@@ -37,8 +37,8 @@
     toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
   }
 
-  /* ───────── router (#/menu, #/booth, #/result) ───────── */
-  const SCREENS = ['home', 'menu', 'booth', 'result'];
+  /* ───────── router (#/themes, #/booth, #/result) ───────── */
+  const SCREENS = ['home', 'themes', 'booth', 'result'];
   let current = null;
 
   function route() {
@@ -52,64 +52,47 @@
     if (current === 'booth' && name !== 'booth') stopCamera();
     current = name;
     for (const s of SCREENS) $('#screen-' + s).hidden = s !== name;
+    document.body.dataset.screen = name;
     document.querySelectorAll('.steps a').forEach((a) => a.classList.toggle('active', a.dataset.step === name));
     window.scrollTo(0, 0);
-    if (name === 'menu') renderMenu();
+    if (name === 'themes') renderThemes();
     if (name === 'booth') enterBooth();
     if (name === 'result') enterResult();
   }
 
   function pressed(el, on) { el.setAttribute('aria-pressed', on ? 'true' : 'false'); }
 
-  function setLayout(id) {
-    if (id === state.layout) return;
-    state.layout = id;
-    state.shots.length = Math.min(state.shots.length, count());
-    state.shotsVersion++;
-    state.stickers = [];
-    state.selected = -1;
-  }
-
-  /* ───────── menu ───────── */
-  function renderMenu() {
-    const list = $('#layout-list');
-    list.innerHTML = '';
-    for (const [id, l] of Object.entries(LAYOUTS)) {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'menu-item';
-      pressed(b, id === state.layout);
-      b.innerHTML = `
-        <span class="mi-icon mi-${id}">${'<i></i>'.repeat(l.count)}</span>
-        <span class="mi-text">
-          <span class="mi-name">${l.name}<small>${l.jp}</small></span>
-          <span class="mi-desc">${l.desc}</span>
-        </span>
-        <span class="mi-price">×${l.count}</span>`;
-      b.addEventListener('click', () => { setLayout(id); renderMenu(); });
-      list.append(b);
+  // Press START: Enter or Space on the title screen
+  document.addEventListener('keydown', (e) => {
+    if (current === 'home' && (e.key === 'Enter' || e.key === ' ') && !e.target.closest('a, button, input')) {
+      e.preventDefault();
+      location.hash = '#/themes';
     }
+  });
 
-    const gridEl = $('#frame-grid');
-    gridEl.innerHTML = '';
-    for (const [id, f] of Object.entries(FRAMES)) {
+  /* ───────── theme select ───────── */
+  function renderThemes() {
+    const grid = $('#theme-grid');
+    grid.innerHTML = '';
+    Object.entries(THEMES).forEach(([id, t], i) => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'frame-card';
-      pressed(b, id === state.frame);
+      b.className = 'theme-card';
+      pressed(b, id === state.theme);
       const cv = document.createElement('canvas');
-      renderStrip(cv, { layout: state.layout, frame: id, scale: 0.4, caption: state.caption, showDate: false });
+      renderStrip(cv, { theme: id, scale: 0.3, caption: state.caption, showDate: false });
       cv.setAttribute('aria-hidden', 'true');
       const label = document.createElement('span');
-      label.className = 'frame-name';
-      label.innerHTML = `${f.name}<small>${f.jp}</small>`;
+      label.className = 'theme-name';
+      label.innerHTML = `<b>${ROMAN[i]}</b>${t.name}<small>${t.jp}</small>`;
       b.append(cv, label);
       b.addEventListener('click', () => {
-        state.frame = id;
-        gridEl.querySelectorAll('.frame-card').forEach((x) => pressed(x, x === b));
+        state.theme = id;
+        grid.querySelectorAll('.theme-card').forEach((x) => pressed(x, x === b));
       });
-      gridEl.append(b);
-    }
+      b.addEventListener('dblclick', () => { state.theme = id; location.hash = '#/booth'; });
+      grid.append(b);
+    });
   }
 
   /* ───────── chips (filters / timers) ───────── */
@@ -143,7 +126,7 @@
       return;
     }
     msg.hidden = false;
-    msg.innerHTML = '<p>Waking up the camera… ☕︎<br><small>please allow camera access</small></p>';
+    msg.innerHTML = '<p class="loading">Now Loading<span>.</span><span>.</span><span>.</span><br><small>please allow camera access</small></p>';
     try {
       const s = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } },
@@ -170,13 +153,13 @@
     video.srcObject = null;
   }
 
-  // Crop to 4:3 from the centre, mirrored so it matches the preview.
+  // Crop to the photo aspect from the centre, mirrored to match the preview.
   function grab(source, sw, sh, mirror) {
     const cv = document.createElement('canvas');
     cv.width = SHOT_W; cv.height = SHOT_H;
     const c = cv.getContext('2d');
     let cw = sw, ch = sh;
-    if (sw / sh > 4 / 3) cw = sh * 4 / 3; else ch = sw * 3 / 4;
+    if (sw / sh > PHOTO_ASPECT) cw = sh * PHOTO_ASPECT; else ch = sw / PHOTO_ASPECT;
     const sx = (sw - cw) / 2, sy = (sh - ch) / 2;
     if (mirror) { c.translate(SHOT_W, 0); c.scale(-1, 1); }
     c.drawImage(source, sx, sy, cw, ch, 0, 0, SHOT_W, SHOT_H);
@@ -205,10 +188,9 @@
 
   function renderTray() {
     const tray = $('#tray');
-    tray.className = 'tray ' + state.layout;
     tray.innerHTML = '';
     const css = FILTERS[state.filter].css;
-    for (let i = 0; i < count(); i++) {
+    for (let i = 0; i < COUNT; i++) {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'thumb';
@@ -217,8 +199,8 @@
         b.classList.add('has-shot');
         b.setAttribute('aria-label', `Retake photo ${i + 1}`);
         const cv = document.createElement('canvas');
-        cv.width = 240; cv.height = 180;
-        cv.getContext('2d').drawImage(shot, 0, 0, 240, 180);
+        cv.width = 180; cv.height = 240;
+        cv.getContext('2d').drawImage(shot, 0, 0, 180, 240);
         cv.style.filter = css;
         b.append(cv);
         b.addEventListener('click', () => {
@@ -231,14 +213,14 @@
         b.tabIndex = -1;
       }
       const n = document.createElement('span');
-      n.textContent = `No.${i + 1}`;
+      n.textContent = ROMAN[i];
       b.append(n);
       tray.append(b);
     }
-    const done = state.shots.slice(0, count()).filter(Boolean).length;
-    $('#tray-hint').textContent = done === count()
+    const done = state.shots.slice(0, COUNT).filter(Boolean).length;
+    $('#tray-hint').textContent = done === COUNT
       ? 'all done! tap a photo to retake it'
-      : `${done} of ${count()} photos`;
+      : `${done} of ${COUNT} photos`;
   }
 
   function updateBoothButtons() {
@@ -276,7 +258,7 @@
     const label = $('#shot-label');
     for (const i of indices) {
       label.hidden = false;
-      label.textContent = `pose ${i + 1} of ${count()} ♡`;
+      label.textContent = `pose ${ROMAN[i]} of IV ♡`;
       await countdown(state.timer);
       if (!stream || !video.videoWidth) break;
       state.shots[i] = grab(video, video.videoWidth, video.videoHeight, true);
@@ -292,7 +274,7 @@
   }
 
   $('#btn-start').addEventListener('click', () => {
-    shoot(Array.from({ length: count() }, (_, i) => i));
+    shoot(Array.from({ length: COUNT }, (_, i) => i));
   });
 
   $('#btn-next').addEventListener('click', (e) => {
@@ -305,8 +287,8 @@
     if (!files.length || busy) return;
     // fill empty slots first; if everything is full, replace from the start
     const empty = [];
-    for (let i = 0; i < count(); i++) if (!state.shots[i]) empty.push(i);
-    const targets = empty.length ? empty : Array.from({ length: count() }, (_, i) => i);
+    for (let i = 0; i < COUNT; i++) if (!state.shots[i]) empty.push(i);
+    const targets = empty.length ? empty : Array.from({ length: COUNT }, (_, i) => i);
     let used = 0;
     for (const file of files.slice(0, targets.length)) {
       try {
@@ -341,14 +323,13 @@
   function ensureFiltered() {
     const key = `${state.filter}|${state.shotsVersion}`;
     if (key === state.filteredKey) return;
-    state.filtered = state.shots.slice(0, count()).map((s) => applyFilter(s, state.filter));
+    state.filtered = state.shots.slice(0, COUNT).map((s) => applyFilter(s, state.filter));
     state.filteredKey = key;
   }
 
-  function stripOptions(selected) {
+  function printOptions(selected) {
     return {
-      layout: state.layout,
-      frame: state.frame,
+      theme: state.theme,
       shots: state.filtered,
       stickers: state.stickers,
       selected,
@@ -364,13 +345,13 @@
     rafPending = true;
     requestAnimationFrame(() => {
       rafPending = false;
-      renderStrip(canvas, stripOptions(state.selected));
+      renderStrip(canvas, printOptions(state.selected));
     });
   }
 
   function enterResult() {
     ensureFiltered();
-    renderSwatches();
+    renderThemeSwatches();
     renderChips($('#result-filter-chips'), filterItems(), (v) => v === state.filter, (v) => {
       state.filter = v;
       ensureFiltered();
@@ -384,24 +365,26 @@
     drawResult();
   }
 
-  function renderSwatches() {
-    const el = $('#frame-swatches');
+  function renderThemeSwatches() {
+    const el = $('#theme-swatches');
     el.innerHTML = '';
-    for (const [id, f] of Object.entries(FRAMES)) {
+    Object.entries(THEMES).forEach(([id, t], i) => {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'swatch';
-      b.title = `${f.name} · ${f.jp}`;
-      b.setAttribute('aria-label', f.name);
-      b.style.background = `radial-gradient(circle at 50% 50%, ${f.bg} 0 52%, ${f.lace} 54% 62%, ${f.bg} 64%)`;
-      pressed(b, id === state.frame);
+      b.title = `${t.name} · ${t.jp}`;
+      b.setAttribute('aria-label', t.name);
+      b.textContent = ROMAN[i];
+      b.style.background = t.bg;
+      b.style.color = t.ink;
+      pressed(b, id === state.theme);
       b.addEventListener('click', () => {
-        state.frame = id;
+        state.theme = id;
         el.querySelectorAll('.swatch').forEach((x) => pressed(x, x === b));
         drawResult();
       });
       el.append(b);
-    }
+    });
   }
 
   let paletteBuilt = false;
@@ -427,13 +410,11 @@
   }
 
   function addSticker(type) {
-    const G = geometry(state.layout);
-    const jitter = () => (Math.random() - 0.5) * G.w * 0.3;
     state.stickers.push({
       type,
-      x: G.w / 2 + jitter(),
-      y: G.h * (0.2 + Math.random() * 0.55),
-      size: Math.round(Math.min(G.w, 760) * 0.24),
+      x: PRINT.w / 2 + (Math.random() - 0.5) * PRINT.w * 0.4,
+      y: PRINT.h * (0.15 + Math.random() * 0.6),
+      size: Math.round(PRINT.w * 0.16),
       rot: Math.round((Math.random() - 0.5) * 30),
     });
     state.selected = state.stickers.length - 1;
@@ -494,14 +475,10 @@
   let drag = null;
   function toCanvas(e) {
     const r = canvas.getBoundingClientRect();
-    // undo the slight CSS tilt by using the unrotated box size
-    const w = canvas.offsetWidth, h = canvas.offsetHeight;
-    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-    const a = 1 * Math.PI / 180;
-    const dx = e.clientX - cx, dy = e.clientY - cy;
-    const ux = dx * Math.cos(a) + dy * Math.sin(a);
-    const uy = -dx * Math.sin(a) + dy * Math.cos(a);
-    return { x: (ux + w / 2) * (canvas.width / w), y: (uy + h / 2) * (canvas.height / h) };
+    return {
+      x: (e.clientX - r.left) * (canvas.width / r.width),
+      y: (e.clientY - r.top) * (canvas.height / r.height),
+    };
   }
   function hit(p) {
     for (let i = state.stickers.length - 1; i >= 0; i--) {
@@ -543,10 +520,10 @@
   $('#btn-download').addEventListener('click', () => {
     ensureFiltered();
     const out = document.createElement('canvas');
-    renderStrip(out, stripOptions(-1));
+    renderStrip(out, printOptions(-1));
     const d = new Date();
     const p = (n) => String(n).padStart(2, '0');
-    const name = `dolly-noir-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.png`;
+    const name = `bisque-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.png`;
     out.toBlob((blob) => {
       if (!blob) { toast('couldn’t save the print, sorry!'); return; }
       const url = URL.createObjectURL(blob);
@@ -566,23 +543,26 @@
     state.shotsVersion++;
     state.stickers = [];
     state.selected = -1;
-    location.hash = '#/menu';
+    location.hash = '#/themes';
   });
 
   /* ───────── boot ───────── */
+  function refresh() {
+    if (current === 'themes') renderThemes();
+    if (current === 'result') drawResult();
+  }
+
   window.addEventListener('hashchange', route);
   route();
+  loadOverlays(refresh);
 
   // Canvas text needs the web fonts loaded before it can use them.
   if (document.fonts && document.fonts.load) {
     Promise.all([
-      '600 64px "Grenze Gotisch"',
-      '17px "Zen Antique"',
-      'italic 20px "IM Fell English"',
+      '118px "Mea Culpa"',
+      '600 18px "Cinzel"',
+      '22px "Shippori Mincho"',
       '30px "VT323"',
-    ].map((f) => document.fonts.load(f, '黒と白の人形写真館 Dolly Noir 0123456789'))).then(() => {
-      if (current === 'menu') renderMenu();
-      if (current === 'result') drawResult();
-    }).catch(() => {});
+    ].map((f) => document.fonts.load(f, '人形写真館 Bisque I II III IV 0123456789'))).then(refresh).catch(() => {});
   }
 })();

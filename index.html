@@ -3,71 +3,62 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dolly Noir</title>
-  <meta name="description" content="Dolly Noir — a black &amp; white gothic lolita photo booth. Lace, ribbons, pearls and filigree.">
-  <meta name="theme-color" content="#0a0507">
+  <title>Bisque Photobooth</title>
+  <meta name="description" content="Bisque — a dark gothic lolita photobooth. Lace, pearls, ribbons and filigree.">
+  <meta name="theme-color" content="#0c0812">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%80%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Grenze+Gotisch:wght@400;500;600;700&family=IM+Fell+English:ital@0;1&family=Pinyon+Script&family=VT323&family=Zen+Antique&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Mea+Culpa&family=Pinyon+Script&family=Shippori+Mincho:wght@400;600&family=VT323&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body data-screen="home">
+  <div class="sky" aria-hidden="true"></div>
   <div class="sparkles" aria-hidden="true">
-    <span>✝</span><span>♡</span><span>☾</span><span>✠</span><span>✝</span><span>♱</span><span>☾</span><span>✦</span>
+    <span>✝</span><span>♡</span><span>✧</span><span>✠</span><span>✦</span><span>♱</span><span>✧</span><span>♡</span>
   </div>
 
   <header class="topbar">
     <a href="#/" class="brand">
-      <span class="brand-jp">人形写真館</span>
-      <span class="brand-en">Dolly Noir</span>
+      <span class="brand-en">Bisque</span>
+      <span class="brand-jp">〜人形写真館</span>
     </a>
     <nav class="steps" aria-label="Steps">
-      <a href="#/menu" data-step="menu"><b>壱</b> menu</a>
-      <a href="#/booth" data-step="booth"><b>弐</b> booth</a>
-      <a href="#/result" data-step="result"><b>参</b> print</a>
+      <a href="#/themes" data-step="themes"><b>I</b>theme</a>
+      <a href="#/booth" data-step="booth"><b>II</b>shoot</a>
+      <a href="#/result" data-step="result"><b>III</b>print</a>
     </nav>
   </header>
 
   <main>
-    <!-- ───────────── HOME ───────────── -->
-    <section id="screen-home" class="screen">
-      <div class="card lace arch home-card">
-        <p class="welcome-jp">ようこそ · 黒と白の人形写真館</p>
-        <div class="title-wrap">
-          <span class="candle" aria-hidden="true"></span>
-          <h1 class="title">Dolly Noir</h1>
-          <span class="candle tall" aria-hidden="true"></span>
+    <!-- ───────────── TITLE SCREEN ───────────── -->
+    <section id="screen-home" class="screen title-screen">
+      <p class="title-eyebrow">a gothic lolita photobooth</p>
+      <h1 class="logo">
+        <span class="logo-word">Bisque</span>
+        <span class="logo-jp">〜人形写真館</span>
+      </h1>
+      <div class="pearl-row" aria-hidden="true"></div>
+      <a class="press-start" href="#/themes">Press START button</a>
+      <p class="title-hint">four poses · lace, pearls &amp; ribbons · no camera? upload photos instead</p>
+
+      <div class="credits">
+        <div class="rating" aria-label="Rated G, all dolls admitted">
+          <span class="rating-g">G</span>
+          <span class="rating-text"><b>General Audiences</b>All Dolls Admitted</span>
         </div>
-        <p class="title-script">a gothic lolita photo booth</p>
-        <div class="pearl-row" aria-hidden="true"></div>
-
-        <ol class="menu-list">
-          <li><span>Choose a layout &amp; frame</span><i></i><span>✝</span></li>
-          <li><span>Pose like a porcelain doll</span><i></i><span>☾</span></li>
-          <li><span>Dress it in ribbons &amp; pearls</span><i></i><span>♱</span></li>
-          <li><span>Keep your print forever</span><i></i><span>♡</span></li>
-        </ol>
-
-        <a class="btn btn-primary btn-big" href="#/menu">Step inside ✝</a>
-        <p class="fine">black lace · white lace · tea at midnight</p>
+        <p>©2026 BISQUE PHOTO STUDIO / 人形写真館<br>Lace · Pearls · Ribbons</p>
       </div>
     </section>
 
-    <!-- ───────────── MENU / FRAME SELECT ───────────── -->
-    <section id="screen-menu" class="screen" hidden>
-      <div class="card lace">
-        <p class="eyebrow">お気に入りをえらんでね</p>
-        <h2 class="section-title">Choose Your Look</h2>
-        <p class="sub">Pick a layout, then a frame, darling.</p>
+    <!-- ───────────── THEME SELECT ───────────── -->
+    <section id="screen-themes" class="screen" hidden>
+      <div class="panel">
+        <p class="eyebrow">Chapter I · テーマをえらんでね</p>
+        <h2 class="section-title">Select Theme</h2>
+        <p class="sub">Four poses, two on top and two on the bottom. Pick your frame, darling.</p>
         <div class="pearl-row" aria-hidden="true"></div>
-
-        <h3 class="menu-heading"><span>Layouts</span><small>レイアウト</small></h3>
-        <div id="layout-list" class="layout-list"></div>
-
-        <h3 class="menu-heading"><span>Frames</span><small>フレーム</small></h3>
-        <div id="frame-grid" class="frame-grid"></div>
-
+        <div id="theme-grid" class="theme-grid"></div>
         <div class="actions">
           <a class="btn btn-primary btn-big" href="#/booth">To the booth ✝</a>
         </div>
@@ -77,12 +68,12 @@
     <!-- ───────────── BOOTH ───────────── -->
     <section id="screen-booth" class="screen" hidden>
       <div class="booth">
-        <div class="card lace booth-main">
-          <p class="eyebrow">撮影中 · now shooting</p>
+        <div class="panel booth-main">
+          <p class="eyebrow">Chapter II · 撮影中</p>
           <div class="viewfinder">
             <video id="video" playsinline muted autoplay></video>
             <div id="cam-msg" class="cam-msg">
-              <p>Waking up the camera… ☕︎</p>
+              <p class="loading">Now Loading<span>.</span><span>.</span><span>.</span></p>
             </div>
             <div id="countdown" class="countdown" hidden></div>
             <div id="shot-label" class="shot-label" hidden></div>
@@ -109,8 +100,8 @@
           </div>
         </div>
 
-        <aside class="card lace tray-card">
-          <p class="eyebrow">フィルム · your photos</p>
+        <aside class="panel tray-card">
+          <p class="eyebrow">Memory Card</p>
           <p id="tray-hint" class="tray-hint"></p>
           <div id="tray" class="tray"></div>
           <a id="btn-next" class="btn btn-primary" href="#/result" aria-disabled="true">Decorate ✦</a>
@@ -122,18 +113,18 @@
     <section id="screen-result" class="screen" hidden>
       <div class="result">
         <div class="result-preview">
-          <canvas id="result-canvas" aria-label="Your photo strip"></canvas>
+          <canvas id="result-canvas" aria-label="Your photo print"></canvas>
           <p class="hint">tap a sticker to select · drag to move</p>
         </div>
 
-        <div class="card lace result-panel">
-          <p class="eyebrow">できあがり！</p>
+        <div class="panel result-panel">
+          <p class="eyebrow">Chapter III · できあがり</p>
           <h2 class="section-title">Your Print</h2>
           <div class="pearl-row" aria-hidden="true"></div>
 
           <div class="control">
-            <span class="control-label">Frame <small>フレーム</small></span>
-            <div id="frame-swatches" class="swatches"></div>
+            <span class="control-label">Theme <small>テーマ</small></span>
+            <div id="theme-swatches" class="swatches"></div>
           </div>
 
           <div class="control">
@@ -143,7 +134,7 @@
 
           <div class="control">
             <label class="control-label" for="caption">Caption <small>ひとこと</small></label>
-            <input id="caption" class="text-input" type="text" maxlength="28" autocomplete="off">
+            <input id="caption" class="text-input" type="text" maxlength="24" autocomplete="off">
             <label class="check"><input id="show-date" type="checkbox" checked> print today's date</label>
             <label class="check"><input id="show-stamp" type="checkbox"> digicam date stamp on photos</label>
           </div>
@@ -152,7 +143,7 @@
             <span class="control-label">Stickers <small>シール</small></span>
             <div id="sticker-palette" class="sticker-palette"></div>
             <div id="sticker-edit" class="sticker-edit" hidden>
-              <label>size <input id="sticker-size" type="range" min="30" max="320"></label>
+              <label>size <input id="sticker-size" type="range" min="40" max="480"></label>
               <label>turn <input id="sticker-rot" type="range" min="-180" max="180"></label>
               <div class="sticker-edit-btns">
                 <button id="sticker-front" class="btn btn-ghost btn-small" type="button">to front</button>
@@ -167,13 +158,13 @@
             <a class="btn btn-ghost" href="#/booth">Retake</a>
             <button id="btn-new" class="btn btn-ghost" type="button">Start over</button>
           </div>
-          <p class="fine">またね ♡<br>see you again, little doll ♱</p>
+          <p class="fine">またね ♡ see you again, little doll</p>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="floor" aria-hidden="true"></footer>
+  <footer class="hem" aria-hidden="true"></footer>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="js/stickers.js"></script>
