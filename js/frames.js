@@ -29,9 +29,13 @@ window.KB = window.KB || {};
   // doesn't write a caption or date there.
   const THEMES = {
     window: {
-      name: 'Locked Lattice', jp: '鍵の格子', overlay: 'frames/theme-1.png', footer: false,
+      name: 'Locked Lattice', tagline: 'latched from the inside', overlay: 'frames/theme-1.png', footer: false,
       bio: 'A wrought-iron window, latched from the inside. A polka-dot ribbon at the sill, a silver key on a length of lace, and two dolls keeping watch from a heart of black organza.',
       cv: 'you ♡',
+      sweetness: 4, gloom: 4,
+      mood: 'melancholy, a little sweet',
+      motifs: 'key · lace · polka dots · wrought iron',
+      look: { filter: 'mono', intensity: 0.7 },
       bg: '#0b0a0d', pattern: 'crosses', pc: 'rgba(239,233,242,.06)',
       lace: '#efe9f2', ink: '#efe9f2', sub: '#b7afc0', line: '#c9c3d3',
       slotA: '#26222c', slotB: '#100e13',
@@ -252,8 +256,8 @@ window.KB = window.KB || {};
     } while (c.measureText(caption).width > PRINT.w - 240 && size > 30);
     c.fillText(caption, cx, y0 + 78);
     c.fillStyle = t.sub;
-    c.font = '19px "Shippori Mincho", serif';
-    const parts = ['人形写真館'];
+    c.font = 'italic 21px "Cormorant Garamond", serif';
+    const parts = ['bisque photobooth'];
     if (o.showDate) parts.push(formatDate(o.date || new Date()));
     c.fillText(parts.join('  ·  '), cx, y0 + 122);
     c.restore();

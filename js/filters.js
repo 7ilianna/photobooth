@@ -26,30 +26,30 @@ window.KB = window.KB || {};
 
   const FILTERS = {
     natural: {
-      name: 'Natural', jp: '素顔',
+      name: 'Natural',
       css: () => 'none',
       ops: [],
     },
     digicam: {
-      name: 'Digicam', jp: 'デジカメ',
+      name: 'Digicam',
       css: (a) => `brightness(${1 + 0.12 * a}) contrast(${1 + 0.12 * a}) saturate(${1 - 0.15 * a})`,
       ops: [op.bright(1.1), op.contrast(1.14), op.sat(0.85), op.tint(-4, 0, 8)],
       vignette: 0.3, grain: 5,
     },
     faded: {
-      name: 'Faded', jp: '色褪せ',
+      name: 'Faded',
       css: (a) => `contrast(${1 - 0.2 * a}) saturate(${1 - 0.45 * a}) sepia(${0.2 * a}) brightness(${1 + 0.08 * a})`,
       ops: [op.fade(40), op.sat(0.55), op.tint(10, 6, 0), op.contrast(0.85)],
       vignette: 0.2, grain: 10,
     },
     mono: {
-      name: 'Monochrome', jp: '白黒',
+      name: 'Monochrome',
       css: (a) => `grayscale(${a}) contrast(${1 + 0.3 * a}) brightness(${1 + 0.02 * a})`,
       ops: [op.gray(), op.contrast(1.3), op.bright(1.02)],
       vignette: 0.45, grain: 14,
     },
     pixel: {
-      name: 'Pixel', jp: 'ドット',
+      name: 'Pixel',
       css: () => 'none',
       ops: [],
       pixel: true,

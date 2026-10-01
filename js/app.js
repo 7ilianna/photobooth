@@ -56,6 +56,7 @@
     document.body.dataset.screen = name;
     document.querySelectorAll('.steps a').forEach((a) => a.classList.toggle('active', a.dataset.step === name));
     window.scrollTo(0, 0);
+    if (name === 'home') showTitleMenu(false);
     if (name === 'themes') renderThemes();
     if (name === 'booth') enterBooth();
     if (name === 'result') enterResult();
@@ -63,13 +64,63 @@
 
   function pressed(el, on) { el.setAttribute('aria-pressed', on ? 'true' : 'false'); }
 
-  // Press START: Enter or Space on the title screen
+  /* ───────── title screen: Press START opens the menu ───────── */
+  function showTitleMenu(show) {
+    $('#press-start').hidden = show;
+    $('#title-menu').hidden = !show;
+    if (show) $('#title-menu a').focus();
+  }
+  $('#press-start').addEventListener('click', (e) => { e.preventDefault(); showTitleMenu(true); });
   document.addEventListener('keydown', (e) => {
-    if (current === 'home' && (e.key === 'Enter' || e.key === ' ') && !e.target.closest('a, button, input')) {
+    if (current !== 'home' || !$('#dialog').hidden) return;
+    if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('a, button, input')) {
       e.preventDefault();
-      location.hash = '#/themes';
+      showTitleMenu(true);
     }
   });
+
+  /* ───────── How to Play / Credits dialogs ───────── */
+  const DIALOGS = { howto: 'How to Play', credits: 'Credits' };
+  let dialogReturn = null;
+  function openDialog(name) {
+    dialogReturn = document.activeElement;
+    $('#dialog-title').textContent = DIALOGS[name];
+    const body = $('#dialog-body');
+    body.innerHTML = '';
+    body.append($('#tpl-' + name).content.cloneNode(true));
+    $('#dialog').hidden = false;
+    $('#dialog-close').focus();
+  }
+  function closeDialog() {
+    $('#dialog').hidden = true;
+    if (dialogReturn) dialogReturn.focus();
+  }
+  document.querySelectorAll('[data-dialog]').forEach((b) => b.addEventListener('click', () => openDialog(b.dataset.dialog)));
+  $('#dialog-close').addEventListener('click', closeDialog);
+  $('#dialog').addEventListener('click', (e) => { if (e.target.id === 'dialog') closeDialog(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#dialog').hidden) closeDialog(); });
+
+  /* ───────── lace doily behind the logo ───────── */
+  function drawDoily() {
+    const r = 300, ring = (n, rad, fn) => Array.from({ length: n }, (_, i) => fn((i / n) * Math.PI * 2, rad)).join('');
+    const at = (a, rad) => [r + Math.cos(a) * rad, r + Math.sin(a) * rad].map((v) => v.toFixed(1));
+    const deg = (a) => (a * 180 / Math.PI).toFixed(1);
+    const holes =
+      ring(72, 268, (a, d) => { const [x, y] = at(a, d); return `<circle cx="${x}" cy="${y}" r="4"/>`; }) +
+      ring(36, 236, (a, d) => { const [x, y] = at(a, d); return `<ellipse cx="${x}" cy="${y}" rx="8" ry="16" transform="rotate(${deg(a)} ${x} ${y})"/>`; }) +
+      ring(48, 200, (a, d) => { const [x, y] = at(a, d); return `<circle cx="${x}" cy="${y}" r="6"/>`; }) +
+      ring(16, 150, (a, d) => { const [x, y] = at(a, d); return `<ellipse cx="${x}" cy="${y}" rx="14" ry="34" transform="rotate(${deg(a) + 90} ${x} ${y})"/>`; }) +
+      ring(24, 104, (a, d) => { const [x, y] = at(a, d); return `<circle cx="${x}" cy="${y}" r="5"/>`; }) +
+      `<circle cx="${r}" cy="${r}" r="70"/>`;
+    const scallops = ring(80, 282, (a, d) => { const [x, y] = at(a, d); return `<circle cx="${x}" cy="${y}" r="12"/>`; });
+    const lace = scallops + `<circle cx="${r}" cy="${r}" r="282"/>` +
+      ring(40, 70, (a, d) => { const [x, y] = at(a, d); return `<circle cx="${x}" cy="${y}" r="9"/>`; });
+    $('#doily').innerHTML =
+      `<svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg"><defs><mask id="doily-holes">` +
+      `<g fill="#fff">${lace}</g><g fill="#000">${holes}</g></mask></defs>` +
+      `<rect width="600" height="600" fill="currentColor" mask="url(#doily-holes)"/></svg>`;
+  }
+  drawDoily();
 
   /* ───────── frame select: a character-profile screen ───────── */
   function renderThemes() {
@@ -79,9 +130,25 @@
     renderStrip($('#profile-canvas'), { theme: ids[i], scale: 0.5, caption: state.caption, showDate: false });
     $('#profile-no').textContent = `Frame No.${String(i + 1).padStart(2, '0')} / ${String(ids.length).padStart(2, '0')}`;
     $('#profile-name').textContent = t.name;
-    $('#profile-jp').textContent = t.jp;
+    $('#profile-tagline').textContent = t.tagline || '';
     $('#profile-bio').textContent = t.bio || '';
     $('#profile-cv').textContent = t.cv ? `CV: ${t.cv}` : '';
+
+    const pips = (n, glyph) => `${glyph.repeat(n)}<i>${glyph.repeat(5 - n)}</i>`;
+    $('#profile-meters').innerHTML =
+      `<div class="meter"><span>Sweetness</span><b aria-label="${t.sweetness || 0} of 5">${pips(t.sweetness || 0, '♡')}</b></div>` +
+      `<div class="meter"><span>Gloom</span><b aria-label="${t.gloom || 0} of 5">${pips(t.gloom || 0, '✝')}</b></div>`;
+
+    const look = t.look && FILTERS[t.look.filter];
+    const rows = [
+      ['Poses', 'four · two by two'],
+      ['Size', '1080 × 1350 · Instagram post'],
+      t.mood && ['Mood', t.mood],
+      t.motifs && ['Motifs', t.motifs],
+      look && ['Pairs with', `${look.name} · ${Math.round(t.look.intensity * 100)}%`],
+    ].filter(Boolean);
+    $('#profile-stats').innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+    $('#profile-look').hidden = !look;
     $('#coming-soon').hidden = ids.length > 1;
 
     // With more than one frame, show a row of small portraits to switch between
@@ -103,6 +170,14 @@
     });
   }
 
+  $('#profile-look').addEventListener('click', () => {
+    const look = THEMES[state.theme].look;
+    if (!look) return;
+    state.filter = look.filter;
+    state.intensity = look.intensity;
+    toast(`${FILTERS[look.filter].name} at ${Math.round(look.intensity * 100)}% ♡ ready in the booth`);
+  });
+
   /* ───────── chips (filters / timers) ───────── */
   function renderChips(el, items, isOn, onPick) {
     el.innerHTML = '';
@@ -119,7 +194,7 @@
       el.append(b);
     }
   }
-  const filterItems = () => Object.entries(FILTERS).map(([id, f]) => [id, `${f.name}<small>${f.jp}</small>`]);
+  const filterItems = () => Object.entries(FILTERS).map(([id, f]) => [id, f.name]);
 
   /* ───────── camera ───────── */
   const video = $('#video');
@@ -191,6 +266,7 @@
     renderChips($('#timer-chips'), [[3, '3 sec'], [5, '5 sec'], [10, '10 sec']], (v) => v === state.timer, (v) => { state.timer = v; });
     applyPreviewFilter();
     renderTray();
+    tickHud();
     updateBoothButtons();
     startCamera();
   }
@@ -280,10 +356,19 @@
       tray.append(b);
     }
     const done = state.shots.slice(0, COUNT).filter(Boolean).length;
+    $('#hud-count').textContent = COUNT - done;
     $('#tray-hint').textContent = done === COUNT
       ? 'all done! tap a photo to retake it'
       : `${done} of ${COUNT} photos`;
   }
+
+  // Live clock in the viewfinder, ticking only while the booth is open
+  const pad = (n) => String(n).padStart(2, '0');
+  function tickHud() {
+    const d = new Date();
+    $('#hud-date').textContent = `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}  ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+  setInterval(() => { if (current === 'booth') tickHud(); }, 1000);
 
   function updateBoothButtons() {
     const start = $('#btn-start');
@@ -441,7 +526,7 @@
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'swatch';
-      b.title = `${t.name} · ${t.jp}`;
+      b.title = t.name;
       b.setAttribute('aria-label', t.name);
       b.textContent = ROMAN[i];
       b.style.background = t.bg;
@@ -631,8 +716,8 @@
     Promise.all([
       '118px "Mea Culpa"',
       '600 18px "Cinzel"',
-      '22px "Shippori Mincho"',
+      'italic 22px "Cormorant Garamond"',
       '30px "VT323"',
-    ].map((f) => document.fonts.load(f, '人形写真館 Bisque I II III IV 0123456789'))).then(refresh).catch(() => {});
+    ].map((f) => document.fonts.load(f, 'Bisque I II III IV 0123456789'))).then(refresh).catch(() => {});
   }
 })();

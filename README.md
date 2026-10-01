@@ -1,12 +1,12 @@
-# Bisque · 人形写真館 🎀
+# Bisque · the doll photo studio 🎀
 
 A dark gothic lolita photobooth that runs in your browser: think a misty 2000s survival-horror title screen, but lace, pearls and porcelain dolls ♱
 
 ## How it works
 
-1. **Title screen**: press START (or hit Enter).
-2. **Select Frame** (`#/themes`): a character-profile screen for each frame (currently *Locked Lattice*). Every print is a 1080×1350 Instagram post (4:5) with four photos, two on top and two on the bottom.
-3. **Shoot** (`#/booth`): choose a filter (Natural, Digicam, Faded, Monochrome or Pixel), its intensity, and a timer, then strike four poses.
+1. **Title screen**: press START (or hit Enter) for the menu: New Session, How to Play and Credits.
+2. **Select Frame** (`#/themes`): a character-profile screen for each frame, with sweetness & gloom ratings, mood, motifs and a one-tap "pairs with" look (currently *Locked Lattice*). Every print is a 1080×1350 Instagram post (4:5) with four photos, two on top and two on the bottom.
+3. **Shoot** (`#/booth`): through a camera viewfinder with a focus ring, shot counter and live clock. choose a filter (Natural, Digicam, Faded, Monochrome or Pixel), its intensity, and a timer, then strike four poses.
    Tap a thumbnail to retake just that one, or upload photos instead of using the camera.
 4. **Print** (`#/result`): switch frame, filter or intensity, write a caption, add an orange digicam date stamp, add stickers
    (ribbons, hearts, crosses, cherries, teacups, shortcake, bats, red & lilac roses, crowns, candles, coffins, moons…) and drag them around.

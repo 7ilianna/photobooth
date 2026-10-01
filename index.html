@@ -9,7 +9,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%80%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Mea+Culpa&family=Pinyon+Script&family=Shippori+Mincho:wght@400;600&family=VT323&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Mea+Culpa&family=Pinyon+Script&family=VT323&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-screen="home">
@@ -22,7 +22,7 @@
   <header class="topbar">
     <a href="#/" class="brand">
       <span class="brand-en">Bisque</span>
-      <span class="brand-jp">〜人形写真館</span>
+      <span class="brand-sub">~ doll photo studio</span>
     </a>
     <nav class="steps" aria-label="Steps">
       <a href="#/themes" data-step="themes"><b>I</b>frame</a>
@@ -35,13 +35,22 @@
     <!-- ───────────── TITLE SCREEN ───────────── -->
     <section id="screen-home" class="screen title-screen">
       <p class="title-eyebrow">a gothic lolita photobooth</p>
-      <h1 class="logo">
-        <span class="logo-word">Bisque</span>
-        <span class="logo-jp">〜人形写真館</span>
-      </h1>
+      <div class="logo-wrap">
+        <div id="doily" class="doily" aria-hidden="true"></div>
+        <h1 class="logo">
+          <span class="logo-word">Bisque</span>
+          <span class="logo-sub">~ the doll photo studio</span>
+        </h1>
+      </div>
       <div class="pearl-row" aria-hidden="true"></div>
-      <p class="subtitle" lang="ja">人形だって、夢を見るの。<span lang="en">Even dolls dream, you know.</span></p>
-      <a class="press-start" href="#/themes">Press START button</a>
+      <p class="subtitle">“Even dolls dream, you know.”</p>
+
+      <a id="press-start" class="press-start" href="#/themes">Press START button</a>
+      <nav id="title-menu" class="title-menu" aria-label="Main menu" hidden>
+        <a href="#/themes">New Session</a>
+        <button type="button" data-dialog="howto">How to Play</button>
+        <button type="button" data-dialog="credits">Credits</button>
+      </nav>
       <p class="title-hint">four poses · lace, pearls &amp; ribbons · no camera? upload photos instead</p>
 
       <div class="credits">
@@ -49,14 +58,18 @@
           <span class="rating-g">G</span>
           <span class="rating-text"><b>General Audiences</b>All Dolls Admitted</span>
         </div>
-        <p>©2026 BISQUE PHOTO STUDIO / 人形写真館<br>Lace · Pearls · Ribbons</p>
+        <p>©2026 BISQUE PHOTO STUDIO<br>Lace · Pearls · Ribbons</p>
+        <div class="memcard" aria-label="Memory card in slot 1">
+          <span class="memcard-chip" aria-hidden="true"></span>
+          <span><b>Memory Card · Slot 1</b>no save data needed</span>
+        </div>
       </div>
     </section>
 
     <!-- ───────────── THEME SELECT ───────────── -->
     <section id="screen-themes" class="screen" hidden>
       <div class="panel">
-        <p class="eyebrow">Chapter I · フレームをえらんでね</p>
+        <p class="eyebrow">Chapter I · Choose your frame</p>
         <h2 class="section-title">Select Frame</h2>
         <p class="sub">Four poses, two on top and two on the bottom, sized for an Instagram post.</p>
         <div class="pearl-row" aria-hidden="true"></div>
@@ -64,13 +77,14 @@
           <div class="profile-portrait"><canvas id="profile-canvas" aria-hidden="true"></canvas></div>
           <div class="profile-info">
             <p class="profile-no" id="profile-no"></p>
-            <h3 class="profile-name"><span id="profile-name"></span><small id="profile-jp" lang="ja"></small></h3>
+            <h3 class="profile-name"><span id="profile-name"></span><small id="profile-tagline"></small></h3>
             <p class="profile-bio" id="profile-bio"></p>
-            <dl class="profile-stats">
-              <div><dt>Poses</dt><dd>4 · two by two</dd></div>
-              <div><dt>Size</dt><dd>1080 × 1350 · IG post</dd></div>
-            </dl>
-            <p class="profile-cv" id="profile-cv"></p>
+            <div class="meters" id="profile-meters"></div>
+            <dl class="profile-stats" id="profile-stats"></dl>
+            <div class="profile-foot">
+              <p class="profile-cv" id="profile-cv"></p>
+              <button id="profile-look" class="look-btn" type="button">Try this look ✦</button>
+            </div>
           </div>
         </div>
         <div id="theme-picker" class="theme-picker"></div>
@@ -85,7 +99,7 @@
     <section id="screen-booth" class="screen" hidden>
       <div class="booth">
         <div class="panel booth-main">
-          <p class="eyebrow">Chapter II · 撮影中</p>
+          <p class="eyebrow">Chapter II · Now shooting</p>
           <div class="viewfinder">
             <video id="video" playsinline muted autoplay></video>
             <canvas id="pixel-preview" class="pixel-preview" hidden></canvas>
@@ -97,11 +111,18 @@
             <div id="flash" class="flash"></div>
             <span class="corner tl"></span><span class="corner tr"></span>
             <span class="corner bl"></span><span class="corner br"></span>
+            <div class="hud" aria-hidden="true">
+              <span class="hud-reticle"></span>
+              <span class="hud-mode">Film · Type-07</span>
+              <span class="hud-battery"><i></i><i></i><i></i></span>
+              <span class="hud-film">Shots <b id="hud-count">4</b></span>
+              <span class="hud-date" id="hud-date"></span>
+            </div>
           </div>
 
           <div class="controls">
             <div class="control">
-              <span class="control-label">Filter <small>フィルター</small></span>
+              <span class="control-label">Filter</span>
               <div id="filter-chips" class="chips"></div>
               <label class="amount" for="filter-amount">
                 <span>intensity</span>
@@ -110,7 +131,7 @@
               </label>
             </div>
             <div class="control">
-              <span class="control-label">Timer <small>タイマー</small></span>
+              <span class="control-label">Timer</span>
               <div id="timer-chips" class="chips"></div>
             </div>
           </div>
@@ -123,7 +144,7 @@
         </div>
 
         <aside class="panel tray-card">
-          <p class="eyebrow">Memory Card</p>
+          <p class="eyebrow">Memory Card · Slot 1</p>
           <p id="tray-hint" class="tray-hint"></p>
           <div id="tray" class="tray"></div>
           <a id="btn-next" class="btn btn-primary" href="#/result" aria-disabled="true">Decorate ✦</a>
@@ -140,17 +161,17 @@
         </div>
 
         <div class="panel result-panel">
-          <p class="eyebrow">Chapter III · できあがり</p>
+          <p class="eyebrow">Chapter III · Developed</p>
           <h2 class="section-title">Your Print</h2>
           <div class="pearl-row" aria-hidden="true"></div>
 
           <div id="theme-control" class="control">
-            <span class="control-label">Frame <small>フレーム</small></span>
+            <span class="control-label">Frame</span>
             <div id="theme-swatches" class="swatches"></div>
           </div>
 
           <div class="control">
-            <span class="control-label">Filter <small>フィルター</small></span>
+            <span class="control-label">Filter</span>
             <div id="result-filter-chips" class="chips"></div>
             <label class="amount" for="result-filter-amount">
               <span>intensity</span>
@@ -161,13 +182,13 @@
           </div>
 
           <div id="caption-control" class="control">
-            <label class="control-label" for="caption">Caption <small>ひとこと</small></label>
+            <label class="control-label" for="caption">Caption</label>
             <input id="caption" class="text-input" type="text" maxlength="22" autocomplete="off">
             <label class="check"><input id="show-date" type="checkbox" checked> print today's date</label>
           </div>
 
           <div class="control">
-            <span class="control-label">Stickers <small>シール</small></span>
+            <span class="control-label">Stickers</span>
             <div id="sticker-palette" class="sticker-palette"></div>
             <div id="sticker-edit" class="sticker-edit" hidden>
               <label>size <input id="sticker-size" type="range" min="40" max="480"></label>
@@ -185,13 +206,41 @@
             <a class="btn btn-ghost" href="#/booth">Retake</a>
             <button id="btn-new" class="btn btn-ghost" type="button">Start over</button>
           </div>
-          <p class="fine">またね ♡ see you again, little doll</p>
+          <p class="fine">see you again, little doll ♡</p>
         </div>
       </div>
     </section>
   </main>
 
+  <p class="footer-line">Bisque · a gothic lolita photobooth · all photos stay on your device</p>
   <footer class="hem" aria-hidden="true"></footer>
+
+  <div id="dialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" hidden>
+    <div class="panel dialog-box">
+      <h2 id="dialog-title" class="section-title"></h2>
+      <div class="pearl-row" aria-hidden="true"></div>
+      <div id="dialog-body" class="dialog-body"></div>
+      <div class="actions"><button id="dialog-close" class="btn btn-ghost" type="button">Back ✝</button></div>
+    </div>
+  </div>
+
+  <template id="tpl-howto">
+    <ol class="howto">
+      <li><b>Choose a frame.</b> Each one has its own profile, and a look it pairs best with.</li>
+      <li><b>Pick a filter</b> and slide its intensity, then choose a timer.</li>
+      <li><b>Press Start</b> and strike four poses. Tap any photo to retake it. No camera? Upload four photos instead.</li>
+      <li><b>Decorate</b> with stickers and a digicam date, then save your 1080 × 1350 post.</li>
+    </ol>
+  </template>
+  <template id="tpl-credits">
+    <dl class="credit-roll">
+      <div><dt>Frame art</dt><dd>you ♡</dd></div>
+      <div><dt>Lettering</dt><dd>Mea Culpa · Cinzel · Cormorant Garamond</dd></div>
+      <div><dt>Fog, lace &amp; pearls</dt><dd>hand-stitched in CSS</dd></div>
+      <div><dt>Your photos</dt><dd>never leave your device</dd></div>
+    </dl>
+    <p class="fine">Thank you for playing.</p>
+  </template>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="js/stickers.js"></script>
