@@ -5,7 +5,7 @@ A dark gothic lolita photobooth that runs in your browser: think a misty 2000s s
 ## How it works
 
 1. **Title screen**: press START (or hit Enter) for the menu: New Session, How to Play and Credits.
-2. **Select Frame** (`#/themes`): a gliding wheel of frames you drag, flick, scroll or turn with the arrows, Plain Black / Plain White underneath it, plus a character-profile card for each frame, with sweetness & gloom ratings, mood, motifs and a one-tap "pairs with" look (*Locked Lattice*, *Angel Lullaby* and *Biscuit Waltz*). Every print is a 1080×1350 Instagram post (4:5) with four photos, two on top and two on the bottom.
+2. **Select Frame** (`#/themes`): a tarot reading. The deck shuffles and deals itself into a fan of face-down cards (lace-doily backs, silver key emblem), which tilt towards your cursor with a foil glare. Turn one over and it flips, bursts into sparkles and the deck types out your fortune in a PS2-style dialogue box; *Shuffle again* riffles and re-deals. Plain Black / Plain White sit underneath. Each frame has a character-profile card with sweetness & gloom ratings, mood, motifs and a one-tap "pairs with" look (*Locked Lattice*, *Angel Lullaby* and *Biscuit Waltz*). Every print is a 1080×1350 Instagram post (4:5) with four photos, two on top and two on the bottom.
 3. **Shoot** (`#/booth`): through a camera viewfinder with a focus ring, shot counter and live clock. choose a filter (Natural, Digicam, Faded, Monochrome or Pixel), its intensity, and a timer, then strike four poses.
    Tap a thumbnail to retake just that one, or upload photos instead of using the camera.
 4. **Print** (`#/result`): switch frame, filter or intensity, write a caption, add an orange digicam date stamp, add stickers
@@ -45,5 +45,5 @@ Repo **Settings → Pages → Deploy from a branch**, then choose your branch an
 - `js/frames.js`: print layout, the frame list and the renderer
 - `js/filters.js`: photo filters (baked into the print)
 - `js/stickers.js`: vector stickers
-- `js/app.js`: router, camera, booth, frame wheel, sticker editing and download
-- `js/sound.js`: the music-box chime (synthesised, no audio files)
+- `js/app.js`: router, camera, booth, tarot frame select, sticker editing and download
+- `js/sound.js`: the music-box chime and dealing notes (synthesised, no audio files)

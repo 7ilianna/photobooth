@@ -66,21 +66,25 @@
         <h2 class="section-title">Select Frame</h2>
         <p class="sub">Four poses, two on top and two on the bottom, sized for an Instagram post.</p>
         <div class="pearl-row" aria-hidden="true"></div>
-        <div id="carousel" class="carousel" tabindex="0" aria-roledescription="carousel"
-             aria-label="Frames. Scroll, swipe or use the arrow keys to turn the wheel.">
-          <button id="car-prev" class="car-arrow prev" type="button" aria-label="Previous frame">‹</button>
-          <div class="car-stage"><div id="car-ring" class="car-ring"></div></div>
-          <button id="car-next" class="car-arrow next" type="button" aria-label="Next frame">›</button>
+        <div id="tarot" class="tarot">
+          <div id="tarot-table" class="tarot-table" role="group" aria-label="Face-down cards, one for each frame. Pick one."></div>
         </div>
-        <p class="car-hint">drag, scroll or tap a frame to turn the wheel</p>
+
+        <div id="fortune" class="fortune">
+          <span class="fortune-who">The Deck</span>
+          <p class="fortune-text"><span id="fortune-typed" aria-hidden="true"></span><span id="fortune-full" class="sr-only" aria-live="polite"></span><b class="fortune-more" aria-hidden="true">▼</b></p>
+        </div>
+        <div class="tarot-actions">
+          <button id="tarot-shuffle" class="shuffle-btn" type="button">Shuffle again ✦</button>
+        </div>
 
         <div class="plain-row">
-          <span class="plain-label">or keep it plain</span>
+          <span class="plain-label">or skip fate and keep it plain</span>
           <button type="button" class="plain-opt" data-plain="black" aria-pressed="false"><canvas aria-hidden="true"></canvas><span>Plain Black</span></button>
           <button type="button" class="plain-opt" data-plain="white" aria-pressed="false"><canvas aria-hidden="true"></canvas><span>Plain White</span></button>
         </div>
 
-        <div id="profile" class="profile" aria-live="polite">
+        <div id="profile" class="profile" hidden>
           <div class="profile-main">
             <p class="profile-no" id="profile-no"></p>
             <h3 class="profile-name"><span id="profile-name"></span><small id="profile-tagline"></small></h3>

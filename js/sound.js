@@ -51,8 +51,24 @@ window.KB = window.KB || {};
     tune.forEach((f, i) => bell(f, t0 + i * 0.075, master));
   }
 
+  // A single plucked note (used for each card as it is dealt)
+  function note(freq, delay) {
+    if (!on) return;
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+    } catch (_) {
+      return;
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    const master = ctx.createGain();
+    master.gain.value = 0.08;
+    master.connect(ctx.destination);
+    bell(freq, ctx.currentTime + 0.01 + (delay || 0), master);
+  }
+
   KB.sound = {
     chime,
+    note,
     get on() { return on; },
     set(value) {
       on = value;

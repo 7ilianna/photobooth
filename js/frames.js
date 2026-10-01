@@ -30,6 +30,7 @@ window.KB = window.KB || {};
   const THEMES = {
     window: {
       name: 'Locked Lattice', tagline: 'latched from the inside', overlay: 'frames/theme-1.png', footer: false,
+      fortune: 'A secret kept behind iron… and a key you were always meant to find.',
       bio: 'A wrought-iron window, latched from the inside. A polka-dot ribbon at the sill, a silver key on a length of lace, and two dolls keeping watch from a heart of black organza.',
       cv: 'you ♡',
       sweetness: 4, gloom: 4,
@@ -42,6 +43,7 @@ window.KB = window.KB || {};
     },
     lullaby: {
       name: 'Angel Lullaby', tagline: 'hush now, little lamb', overlay: 'frames/theme-2.png', footer: false,
+      fortune: 'Someone is watching over you tonight. Close your eyes, little lamb.',
       bio: 'White ruffled curtains tied back with silver ribbon. An angel has left a wing at the sill, a rocking horse waits by the window, and a sleepy lamb keeps watch over a cherub who cried herself to sleep.',
       cv: 'you ♡',
       sweetness: 5, gloom: 2,
@@ -54,6 +56,7 @@ window.KB = window.KB || {};
     },
     biscuit: {
       name: 'Biscuit Waltz', tagline: 'tea at four, music at five', overlay: 'frames/theme-3.png', footer: false,
+      fortune: 'Sweet things are coming, right on time. Save the last dance for me.',
       bio: 'Pastel plaid and pearl-strung windows. Butter biscuits and wafer rolls, whipped cream on a silver fork, and a little audience of woodland friends waiting for the music to start.',
       cv: 'you ♡',
       sweetness: 5, gloom: 1,
@@ -67,6 +70,7 @@ window.KB = window.KB || {};
     // A clean border with no art, in black or white (picked with `tone`)
     plain: {
       name: 'Plain', tagline: 'just you, in black or white', plain: true,
+      fortune: 'Nothing hidden, nothing to fear. Just you, exactly as you are.',
       bio: 'No lace, no keys. A clean border in black or white, so the photos do all the talking.',
       sweetness: 2, gloom: 2, mood: 'quiet', motifs: 'none at all',
       look: { filter: 'natural', intensity: 1 },

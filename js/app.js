@@ -102,24 +102,25 @@
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#dialog').hidden) closeDialog(); });
 
 
-  /* ───────── frame select: a gliding cover-flow wheel + character profile ───────── */
-  // The art frames turn on the wheel; Plain (black or white) sits underneath it.
-  const wheelIds = Object.keys(THEMES).filter((id) => !THEMES[id].plain);
+  /* ───────── frame select: a tarot reading ───────── */
+  // Each art frame is a face-down card. The deck deals itself into a fan,
+  // you turn one over, and the deck tells your fortune. Plain sits underneath.
+  const deckIds = Object.keys(THEMES).filter((id) => !THEMES[id].plain);
   const plainId = Object.keys(THEMES).find((id) => THEMES[id].plain);
-  const N = wheelIds.length;
-  const ring = $('#car-ring');
-  const carousel = $('#carousel');
-  const wrap = (n) => ((n % N) + N) % N;
+  const table = $('#tarot-table');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isPlain = () => !!THEMES[state.theme].plain;
-  const cardSpacing = () => (ring.querySelector('.car-card')?.offsetWidth || 220) * 0.62;
+  const wait = (ms) => new Promise((r) => setTimeout(r, reduceMotion ? 0 : ms));
+  const DEAL_NOTES = [1318.5, 1568.0, 1760.0, 2093.0, 2349.3, 2637.0];
 
-  let pos = Math.max(0, wheelIds.indexOf(state.theme)); // where the wheel is drawn (keeps counting past N)
-  let target = pos;                                      // where it is easing towards
-  let lastIndex = wrap(Math.round(pos));
-  let raf = 0;
+  let cards = {};          // frame id → card element
+  let order = [];          // left-to-right order of the fan, reshuffled on request
+  let chosen = null;       // the face-up card
+  let picked = false;      // has anything been chosen yet?
+  let dealing = false;
+  let mode = 'deck';
 
-  // One chime per turn, however fast the wheel spins
+  // One chime per action, however fast things happen
   let lastChime = 0;
   function chime() {
     const now = performance.now();
@@ -128,117 +129,207 @@
     sound.chime();
   }
 
-  function buildCarousel() {
-    ring.innerHTML = '';
-    wheelIds.forEach((id, n) => {
+  function shuffled(list) {
+    const a = [...list];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function buildDeck() {
+    table.innerHTML = '';
+    cards = {};
+    deckIds.forEach((id, n) => {
+      const t = THEMES[id];
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'car-card';
-      b.dataset.n = n;
-      b.setAttribute('aria-label', THEMES[id].name);
-      b.append(document.createElement('canvas'));
-      const label = document.createElement('span');
-      label.textContent = `${ROMAN[n]} · ${THEMES[id].name}`;
-      b.append(label);
-      b.addEventListener('click', (e) => {
-        if (moved) { e.preventDefault(); return; }
-        goTo(nearest(n));
-      });
-      ring.append(b);
+      b.className = 'tcard';
+      b.dataset.id = id;
+      b.setAttribute('aria-label', 'A face-down card');
+      b.innerHTML =
+        '<span class="tcard-inner">' +
+          '<span class="tcard-face tcard-back" aria-hidden="true"><span class="tcard-doily"></span><span class="tcard-emblem"></span><span class="tcard-mark">Bisque</span><span class="tcard-glare"></span></span>' +
+          `<span class="tcard-face tcard-front"><span class="tcard-num">${ROMAN[n]}</span><canvas aria-hidden="true"></canvas><span class="tcard-name">${t.name}</span><span class="tcard-glare"></span></span>` +
+        '</span>';
+      b.addEventListener('click', () => choose(id));
+      b.addEventListener('pointermove', tilt);
+      b.addEventListener('pointerleave', untilt);
+      table.append(b);
+      cards[id] = b;
     });
-    paintCarousel();
+    paintCards();
   }
 
-  // The copy of frame n closest to where the wheel is heading
-  function nearest(n) {
-    const base = Math.round(target);
-    const diff = wrap(n - base);
-    return base + (diff > N / 2 ? diff - N : diff);
-  }
-
-  function paintCarousel() {
-    ring.querySelectorAll('.car-card').forEach((b) => {
-      renderStrip(b.querySelector('canvas'), { theme: wheelIds[b.dataset.n], scale: 0.26, caption: state.caption, showDate: false });
-    });
+  function paintCards() {
+    for (const id of deckIds) {
+      renderStrip(cards[id].querySelector('canvas'), { theme: id, scale: 0.2, caption: state.caption, showDate: false });
+    }
     document.querySelectorAll('.plain-opt').forEach((b) => {
       renderStrip(b.querySelector('canvas'), { theme: plainId, tone: b.dataset.plain, scale: 0.1, caption: state.caption, showDate: false });
     });
   }
 
-  // Lay every card out along a gentle arc around the current position
-  function layoutCarousel() {
-    const spacing = cardSpacing();
-    const resting = isPlain();
-    ring.querySelectorAll('.car-card').forEach((b) => {
-      let off = +b.dataset.n - pos;
-      off = (((off % N) + N + N / 2) % N) - N / 2; // wrap into [-N/2, N/2)
-      const a = Math.abs(off);
-      const x = off * spacing * (1 - Math.min(a, 2) * 0.1);
-      const rot = Math.max(-55, Math.min(55, -off * 40));
-      const z = -Math.min(a, 2.5) * 160;
-      const scale = 1 - Math.min(a, 2) * 0.08;
-      // fade out before a card wraps round the back, however few frames there are
-      const opacity = Math.max(0, Math.min(1, 1.9 - a, (N / 2 - a) * 2.5));
-      b.style.transform = `translateX(${x.toFixed(2)}px) translateZ(${z.toFixed(1)}px) rotateY(${rot.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
-      b.style.opacity = opacity.toFixed(3);
-      b.style.zIndex = String(100 - Math.round(a * 10));
-      b.style.filter = `brightness(${((1 - Math.min(a, 1.5) * 0.4) * (resting ? 0.5 : 1)).toFixed(3)})`;
-      b.style.pointerEvents = opacity < 0.2 ? 'none' : '';
-      b.classList.toggle('is-front', a < 0.5 && !resting);
-      b.tabIndex = a < 0.5 ? 0 : -1;
+  // Put every card where it belongs for the current moment of the reading
+  function place(m) {
+    mode = m;
+    const w = table.querySelector('.tcard')?.offsetWidth || 190;
+    const n = order.length, mid = (n - 1) / 2;
+    const spread = Math.min(w * 1.08, (table.offsetWidth - w) / Math.max(1, n - 1));
+    const others = order.filter((id) => id !== chosen);
+    order.forEach((id, i) => {
+      const b = cards[id];
+      let x = 0, y = 0, r = 0, s = 1, z = i + 1;
+      if (m === 'deck') {
+        x = (i - mid) * 3; y = -i * 3; r = (i - mid) * 2;
+      } else if (m === 'riffle') {
+        x = (Math.random() - 0.5) * w * 1.3; y = (Math.random() - 0.5) * 30; r = (Math.random() - 0.5) * 30; z = Math.ceil(Math.random() * n);
+      } else if (chosen && id === chosen) {
+        y = -14; s = 1.14; z = 50;
+      } else if (chosen) {
+        const k = others.indexOf(id), half = Math.ceil(others.length / 2);
+        const side = k < half ? -1 : 1, step = k < half ? half - k : k - half + 1;
+        x = side * (spread * 0.95 + (step - 1) * spread * 0.45); y = 46; r = side * 12; s = 0.84; z = 10 - step;
+      } else {
+        const k = i - mid;
+        x = k * spread; y = Math.abs(k) * 18; r = k * 7;
+      }
+      b.style.setProperty('--x', `${x.toFixed(1)}px`);
+      b.style.setProperty('--y', `${y.toFixed(1)}px`);
+      b.style.setProperty('--r', `${r.toFixed(1)}deg`);
+      b.style.setProperty('--s', s.toFixed(3));
+      b.style.zIndex = String(z);
+      const up = id === chosen;
+      b.classList.toggle('is-up', up);
+      b.classList.toggle('is-dim', !!chosen && !up && m === 'spread');
+      b.setAttribute('aria-label', up ? `${THEMES[id].name}, chosen` : 'A face-down card');
+      b.setAttribute('aria-pressed', up ? 'true' : 'false');
     });
   }
 
-  // Ease towards the target every frame; update the profile as frames pass the front
-  function tick() {
-    raf = 0;
-    const d = target - pos;
-    pos = reduceMotion || Math.abs(d) < 0.0005 ? target : pos + d * 0.12;
-    layoutCarousel();
-    const idx = wrap(Math.round(pos));
-    if (idx !== lastIndex && !isPlain()) {
-      lastIndex = idx;
-      state.theme = wheelIds[idx];
-      chime();
-      renderProfile();
+  // Gather, optionally riffle, then deal into a fan with a note per card
+  async function deal({ reshuffle = false, reveal = null } = {}) {
+    if (dealing) return;
+    dealing = true;
+    table.classList.add('is-dealing');
+    if (chosen) { chosen = null; place('spread'); await wait(520); }
+    place('deck');
+    await wait(560);
+    if (reshuffle) {
+      speak('Shuffling… the deck is thinking.');
+      for (let k = 0; k < 3; k++) {
+        place('riffle'); sound.note(DEAL_NOTES[k] / 2);
+        await wait(240);
+        place('deck');
+        await wait(200);
+      }
+      order = shuffled(deckIds);
+      place('deck');
+      await wait(300);
     }
-    if (pos !== target || carDrag) raf = requestAnimationFrame(tick);
+    order.forEach((id, i) => {
+      cards[id].style.setProperty('--delay', `${reduceMotion ? 0 : i * 0.12}s`);
+      sound.note(DEAL_NOTES[i % DEAL_NOTES.length], reduceMotion ? 0 : i * 0.12);
+    });
+    place('spread');
+    await wait(order.length * 120 + 750);
+    order.forEach((id) => cards[id].style.removeProperty('--delay'));
+    table.classList.remove('is-dealing');
+    dealing = false;
+    if (reveal) choose(reveal);
+    else speak(picked ? 'The cards are dealt. Choose again, if you dare…' : 'Pick a card, any card. The deck already knows which frame is yours…');
   }
-  function kick() { if (!raf) raf = requestAnimationFrame(tick); }
 
-  // Touching the wheel while Plain is chosen brings the front art frame back
-  function leavePlain() {
-    if (!isPlain()) return;
-    lastIndex = wrap(Math.round(target));
-    state.theme = wheelIds[lastIndex];
+  function choose(id) {
+    if (dealing || chosen === id) return;
+    untilt({ currentTarget: cards[id] });
+    picked = true;
+    chosen = id;
+    state.theme = id;
+    place('spread');
     syncPlainButtons();
     renderProfile();
+    speak(THEMES[id].fortune);
+    setTimeout(() => burst(cards[id]), reduceMotion ? 0 : 420);
   }
 
-  function goTo(t) {
-    leavePlain();
-    target = t;
-    kick();
+  // A shower of sparkles from the card that was turned over
+  function burst(el) {
+    if (reduceMotion) return;
+    const tr = table.getBoundingClientRect(), r = el.getBoundingClientRect();
+    const cx = r.left - tr.left + r.width / 2, cy = r.top - tr.top + r.height / 2;
+    const glyphs = ['✦', '✧', '♡', '✝', '✦', '·'];
+    for (let i = 0; i < 18; i++) {
+      const s = document.createElement('span');
+      s.className = 'spark';
+      s.textContent = glyphs[i % glyphs.length];
+      const a = (i / 18) * Math.PI * 2 + Math.random() * 0.4;
+      const d = 90 + Math.random() * 110;
+      s.style.cssText = `left:${cx}px;top:${cy}px;--dx:${(Math.cos(a) * d).toFixed(0)}px;--dy:${(Math.sin(a) * d).toFixed(0)}px;--rot:${(Math.random() * 360).toFixed(0)}deg;font-size:${(12 + Math.random() * 14).toFixed(0)}px`;
+      table.append(s);
+      setTimeout(() => s.remove(), 1100);
+    }
+  }
+
+  // Cards lean towards the cursor, with a foil glare that follows it
+  function tilt(e) {
+    if (e.pointerType !== 'mouse' || dealing) return;
+    const b = e.currentTarget, r = b.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+    b.classList.add('is-tilting');
+    b.style.setProperty('--ry', `${((px - 0.5) * 26).toFixed(1)}deg`);
+    b.style.setProperty('--rx', `${((0.5 - py) * 20).toFixed(1)}deg`);
+    b.style.setProperty('--gx', `${(px * 100).toFixed(0)}%`);
+    b.style.setProperty('--gy', `${(py * 100).toFixed(0)}%`);
+  }
+  function untilt(e) {
+    const b = e.currentTarget;
+    b.classList.remove('is-tilting');
+    for (const v of ['--rx', '--ry', '--gx', '--gy']) b.style.removeProperty(v);
+  }
+
+  // The fortune types itself out like a PS2 dialogue box
+  let speakToken = 0;
+  function speak(text) {
+    const token = ++speakToken;
+    const typed = $('#fortune-typed');
+    const box = $('#fortune');
+    $('#fortune-full').textContent = text;
+    box.classList.remove('is-done');
+    if (reduceMotion) { typed.textContent = text; box.classList.add('is-done'); return; }
+    typed.textContent = '';
+    let i = 0;
+    (function step() {
+      if (token !== speakToken) return;
+      typed.textContent = text.slice(0, ++i);
+      if (i < text.length) setTimeout(step, text[i - 1] === '.' || text[i - 1] === '…' ? 140 : 26);
+      else box.classList.add('is-done');
+    })();
   }
 
   function renderThemes() {
-    if (ring.children.length !== N) buildCarousel(); else paintCarousel();
-    if (!isPlain()) {
-      const i = wheelIds.indexOf(state.theme);
-      pos = target = Math.round(pos) - wrap(Math.round(pos)) + i;
-      lastIndex = i;
-    }
-    layoutCarousel();
+    if (!table.children.length) buildDeck(); else paintCards();
+    if (!order.length) order = shuffled(deckIds);
+    const again = picked && !isPlain() ? state.theme : null;
+    chosen = null;
+    table.classList.add('no-anim');
+    place('deck');
+    void table.offsetWidth;
+    table.classList.remove('no-anim');
     syncPlainButtons();
     renderProfile();
+    if (isPlain() && picked) speak(THEMES[plainId].fortune);
+    deal({ reveal: again });
   }
 
   function renderProfile() {
     const t = THEMES[state.theme];
+    $('#profile').hidden = !picked;
     const toneName = state.tone === 'white' ? 'White' : 'Black';
     $('#profile-no').textContent = t.plain
       ? 'Plain frame'
-      : `Frame No.${String(wheelIds.indexOf(state.theme) + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}`;
+      : `Arcana ${ROMAN[deckIds.indexOf(state.theme)]} of ${ROMAN[deckIds.length - 1]}`;
     $('#profile-name').textContent = t.plain ? `Plain ${toneName}` : t.name;
     $('#profile-tagline').textContent = t.tagline || '';
     $('#profile-bio').textContent = t.bio || '';
@@ -262,72 +353,24 @@
     $('#coming-soon').hidden = !Object.values(THEMES).some((x) => x.placeholder && !x.image);
   }
 
-  // Drag (mouse or finger) scrubs the wheel; a flick lets it coast a little
-  let carDrag = null;
-  let moved = false;
-  carousel.addEventListener('pointerdown', (e) => {
-    if (e.button !== 0 || e.target.closest('.car-arrow')) return;
-    const now = performance.now();
-    carDrag = { x: e.clientX, start: target, lastX: e.clientX, lastT: now, v: 0 };
-    moved = false;
-  });
-  window.addEventListener('pointermove', (e) => {
-    if (!carDrag) return;
-    const dx = e.clientX - carDrag.x;
-    if (!moved && Math.abs(dx) < 6) return;
-    if (!moved) { moved = true; leavePlain(); }
-    const now = performance.now();
-    carDrag.v = (e.clientX - carDrag.lastX) / Math.max(1, now - carDrag.lastT);
-    carDrag.lastX = e.clientX;
-    carDrag.lastT = now;
-    pos = target = carDrag.start - dx / cardSpacing();
-    kick();
-  });
-  window.addEventListener('pointerup', () => {
-    if (!carDrag) return;
-    if (moved) {
-      const fling = Math.max(-2, Math.min(2, (-carDrag.v * 220) / cardSpacing()));
-      target = Math.round(target + fling);
-      kick();
-    }
-    carDrag = null;
-    setTimeout(() => { moved = false; }, 0);
-  });
+  $('#tarot-shuffle').addEventListener('click', () => deal({ reshuffle: true }));
+  window.addEventListener('resize', () => { if (current === 'themes' && !dealing) place(mode); });
 
-  // Trackpads scroll continuously; a mouse wheel notch moves one frame
-  let wheelSnap = 0;
-  carousel.addEventListener('wheel', (e) => {
-    const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    if (!d) return;
-    e.preventDefault();
-    leavePlain();
-    const unit = e.deltaMode === 1 ? 0.34 : 1 / 180;
-    target += Math.max(-1, Math.min(1, d * unit));
-    kick();
-    clearTimeout(wheelSnap);
-    wheelSnap = setTimeout(() => { target = Math.round(target); kick(); }, 160);
-  }, { passive: false });
-
-  $('#car-prev').addEventListener('click', () => goTo(Math.round(target) - 1));
-  $('#car-next').addEventListener('click', () => goTo(Math.round(target) + 1));
-  carousel.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(Math.round(target) - 1); }
-    if (e.key === 'ArrowRight') { e.preventDefault(); goTo(Math.round(target) + 1); }
-  });
-  window.addEventListener('resize', () => { if (current === 'themes') layoutCarousel(); });
-
-  // Plain Black / Plain White, under the wheel
+  // Plain Black / Plain White, under the cards
   function syncPlainButtons() {
-    const plain = isPlain();
+    const plain = isPlain() && picked;
     document.querySelectorAll('.plain-opt').forEach((b) => pressed(b, plain && b.dataset.plain === state.tone));
-    carousel.classList.toggle('is-resting', plain);
   }
   document.querySelectorAll('.plain-opt').forEach((b) => b.addEventListener('click', () => {
+    if (dealing) return;
+    picked = true;
+    chosen = null;
     state.theme = plainId;
     state.tone = b.dataset.plain;
+    place('spread');
     syncPlainButtons();
-    layoutCarousel();
     renderProfile();
+    speak(THEMES[plainId].fortune);
   }));
 
   // Plain border colour on the print screen
@@ -881,7 +924,6 @@
   document.addEventListener('click', (e) => {
     const el = e.target.closest('button, a[href], label.btn, input[type="checkbox"]');
     if (!el || el.disabled || el.getAttribute('aria-disabled') === 'true' || el.id === 'sound-toggle') return;
-    if (el.classList.contains('car-card') && moved) return;
     chime();
   }, true);
 
