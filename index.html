@@ -72,6 +72,7 @@
           <p class="eyebrow">Chapter II · 撮影中</p>
           <div class="viewfinder">
             <video id="video" playsinline muted autoplay></video>
+            <canvas id="pixel-preview" class="pixel-preview" hidden></canvas>
             <div id="cam-msg" class="cam-msg">
               <p class="loading">Now Loading<span>.</span><span>.</span><span>.</span></p>
             </div>
@@ -86,6 +87,11 @@
             <div class="control">
               <span class="control-label">Filter <small>フィルター</small></span>
               <div id="filter-chips" class="chips"></div>
+              <label class="amount" for="filter-amount">
+                <span>intensity</span>
+                <input id="filter-amount" type="range" min="0" max="100" step="1" value="100">
+                <output for="filter-amount">100%</output>
+              </label>
             </div>
             <div class="control">
               <span class="control-label">Timer <small>タイマー</small></span>
@@ -130,6 +136,11 @@
           <div class="control">
             <span class="control-label">Filter <small>フィルター</small></span>
             <div id="result-filter-chips" class="chips"></div>
+            <label class="amount" for="result-filter-amount">
+              <span>intensity</span>
+              <input id="result-filter-amount" type="range" min="0" max="100" step="1" value="100">
+              <output for="result-filter-amount">100%</output>
+            </label>
             <label class="check"><input id="show-stamp" type="checkbox"> digicam date stamp on photos</label>
           </div>
 

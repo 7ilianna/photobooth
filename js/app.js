@@ -1,5 +1,5 @@
 (function () {
-  const { THEMES, PRINT, PHOTO_ASPECT, FILTERS, STICKERS, renderStrip, applyFilter, drawSticker, loadOverlays } = window.KB;
+  const { THEMES, PRINT, PHOTO_ASPECT, FILTERS, STICKERS, renderStrip, applyFilter, pixelate, drawSticker, loadOverlays } = window.KB;
 
   const $ = (s, r = document) => r.querySelector(s);
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -10,6 +10,7 @@
   const state = {
     theme: Object.keys(THEMES)[0],
     filter: 'digicam',
+    intensity: 1,       // 0–1, shared by every filter
     timer: 3,
     shots: [],          // raw 3:4 canvases, mirrored like a mirror
     shotsVersion: 0,
@@ -154,16 +155,21 @@
     video.srcObject = null;
   }
 
+  // Centre crop of a sw×sh source at the photo aspect.
+  function centreCrop(sw, sh) {
+    let w = sw, h = sh;
+    if (sw / sh > PHOTO_ASPECT) w = sh * PHOTO_ASPECT; else h = sw / PHOTO_ASPECT;
+    return { x: (sw - w) / 2, y: (sh - h) / 2, w, h };
+  }
+
   // Crop to the photo aspect from the centre, mirrored to match the preview.
   function grab(source, sw, sh, mirror) {
     const cv = document.createElement('canvas');
     cv.width = SHOT_W; cv.height = SHOT_H;
     const c = cv.getContext('2d');
-    let cw = sw, ch = sh;
-    if (sw / sh > PHOTO_ASPECT) cw = sh * PHOTO_ASPECT; else ch = sw / PHOTO_ASPECT;
-    const sx = (sw - cw) / 2, sy = (sh - ch) / 2;
+    const r = centreCrop(sw, sh);
     if (mirror) { c.translate(SHOT_W, 0); c.scale(-1, 1); }
-    c.drawImage(source, sx, sy, cw, ch, 0, 0, SHOT_W, SHOT_H);
+    c.drawImage(source, r.x, r.y, r.w, r.h, 0, 0, SHOT_W, SHOT_H);
     return cv;
   }
 
@@ -173,9 +179,9 @@
   function enterBooth() {
     renderChips($('#filter-chips'), filterItems(), (v) => v === state.filter, (v) => {
       state.filter = v;
-      applyPreviewFilter();
-      renderTray();
+      filterChanged();
     });
+    syncIntensity();
     renderChips($('#timer-chips'), [[3, '3 sec'], [5, '5 sec'], [10, '10 sec']], (v) => v === state.timer, (v) => { state.timer = v; });
     applyPreviewFilter();
     renderTray();
@@ -184,13 +190,63 @@
   }
 
   function applyPreviewFilter() {
-    video.style.filter = FILTERS[state.filter].css;
+    video.style.filter = FILTERS[state.filter].css(state.intensity);
+    startPixelPreview();
+  }
+
+  // The Pixel filter can't be done in CSS, so draw the camera into a canvas.
+  const pixelCanvas = $('#pixel-preview');
+  pixelCanvas.width = SHOT_W; pixelCanvas.height = SHOT_H;
+  let pixelRaf = 0;
+  function startPixelPreview() {
+    if (!pixelRaf) pixelRaf = requestAnimationFrame(pixelFrame);
+  }
+  function pixelFrame() {
+    pixelRaf = 0;
+    const on = current === 'booth' && stream && FILTERS[state.filter].pixel && video.videoWidth > 0;
+    pixelCanvas.hidden = !on;
+    if (!on) return;
+    pixelate(video, centreCrop(video.videoWidth, video.videoHeight), pixelCanvas, state.intensity, true);
+    pixelRaf = requestAnimationFrame(pixelFrame);
+  }
+
+  /* ───────── intensity slider (shared by booth and print screens) ───────── */
+  const amountInputs = [$('#filter-amount'), $('#result-filter-amount')];
+  function syncIntensity() {
+    const f = FILTERS[state.filter];
+    const off = !f.ops.length && !f.pixel; // Natural has nothing to adjust
+    for (const input of amountInputs) {
+      input.value = Math.round(state.intensity * 100);
+      input.disabled = off;
+      input.closest('.amount').classList.toggle('is-off', off);
+      input.closest('.amount').querySelector('output').textContent = off ? '—' : `${input.value}%`;
+    }
+  }
+
+  // Re-filtering four full-size photos is heavy, so coalesce slider drags.
+  let refilterTimer = 0;
+  function filterChanged() {
+    syncIntensity();
+    if (current === 'booth') {
+      applyPreviewFilter();
+      clearTimeout(refilterTimer);
+      refilterTimer = setTimeout(renderTray, 60);
+    } else if (current === 'result') {
+      clearTimeout(refilterTimer);
+      refilterTimer = setTimeout(() => { ensureFiltered(); drawResult(); }, 40);
+    }
+  }
+
+  for (const input of amountInputs) {
+    input.addEventListener('input', () => {
+      state.intensity = input.value / 100;
+      filterChanged();
+    });
   }
 
   function renderTray() {
     const tray = $('#tray');
     tray.innerHTML = '';
-    const css = FILTERS[state.filter].css;
     for (let i = 0; i < COUNT; i++) {
       const b = document.createElement('button');
       b.type = 'button';
@@ -199,11 +255,10 @@
       if (shot) {
         b.classList.add('has-shot');
         b.setAttribute('aria-label', `Retake photo ${i + 1}`);
-        const cv = document.createElement('canvas');
-        cv.width = 192; cv.height = 240;
-        cv.getContext('2d').drawImage(shot, 0, 0, 192, 240);
-        cv.style.filter = css;
-        b.append(cv);
+        const small = document.createElement('canvas');
+        small.width = 192; small.height = 240;
+        small.getContext('2d').drawImage(shot, 0, 0, 192, 240);
+        b.append(applyFilter(small, state.filter, state.intensity));
         b.addEventListener('click', () => {
           if (busy) return;
           if (!stream) { toast('no camera — upload a photo to replace it ♡'); return; }
@@ -322,9 +377,9 @@
   const canvas = $('#result-canvas');
 
   function ensureFiltered() {
-    const key = `${state.filter}|${state.shotsVersion}`;
+    const key = `${state.filter}|${state.intensity}|${state.shotsVersion}`;
     if (key === state.filteredKey) return;
-    state.filtered = state.shots.slice(0, COUNT).map((s) => applyFilter(s, state.filter));
+    state.filtered = state.shots.slice(0, COUNT).map((s) => applyFilter(s, state.filter, state.intensity));
     state.filteredKey = key;
   }
 
@@ -357,9 +412,9 @@
     syncCaptionControl();
     renderChips($('#result-filter-chips'), filterItems(), (v) => v === state.filter, (v) => {
       state.filter = v;
-      ensureFiltered();
-      drawResult();
+      filterChanged();
     });
+    syncIntensity();
     $('#caption').value = state.caption;
     $('#show-date').checked = state.showDate;
     $('#show-stamp').checked = state.stamp;
