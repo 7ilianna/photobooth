@@ -1,4 +1,4 @@
-/* Layouts ("sets") and frames ("tablecloths"), plus the strip renderer. */
+/* Layouts, frames and the strip renderer. */
 window.KB = window.KB || {};
 
 (function (KB) {
@@ -6,10 +6,10 @@ window.KB = window.KB || {};
   const { pearl, drawSticker, heartPath } = KB;
 
   const LAYOUTS = {
-    strip4: { name: 'Classic Strip', jp: '定番', count: 4, desc: 'four poses, one tall strip', price: '¥480' },
-    strip3: { name: 'Trio', jp: '三枚', count: 3, desc: 'three poses, a little shorter', price: '¥380' },
-    duo: { name: 'Duo', jp: '二人', count: 2, desc: 'two big frames for besties', price: '¥280' },
-    grid4: { name: 'Postcard', jp: '絵葉書', count: 4, desc: 'a 2×2 grid, like a café postcard', price: '¥520' },
+    strip4: { name: 'Classic Strip', jp: '定番', count: 4, desc: 'four poses, one tall strip' },
+    strip3: { name: 'Trio', jp: '三枚', count: 3, desc: 'three poses, a little shorter' },
+    duo: { name: 'Duo', jp: '二人', count: 2, desc: 'two big frames for besties' },
+    grid4: { name: 'Postcard', jp: '絵葉書', count: 4, desc: 'a 2×2 grid, like an old album page' },
   };
 
   // Slots are 4:3. All units are canvas pixels at scale 1.
@@ -43,6 +43,30 @@ window.KB = window.KB || {};
   const geometry = (id) => (GEOMETRY[id] || GEOMETRY.strip4)();
 
   const FRAMES = {
+    kuro: {
+      name: 'Kuro', jp: '黒ロリ',
+      bg: '#0b0a0c', pattern: 'damask', pc: 'rgba(240,236,240,.06)',
+      lace: '#f4f0ee', text: '#f4f0ee', sub: '#b9b0bd', line: '#f4f0ee',
+      bow: '#0b0a0c', bowEdge: '#f4f0ee', photoFiligree: '#f4f0ee',
+      garland: true, pearlFrame: false,
+      slotA: '#2a2830', slotB: '#121115',
+    },
+    shiro: {
+      name: 'Shiro', jp: '白ロリ',
+      bg: '#f7f4f1', pattern: 'dots', pc: 'rgba(20,16,20,.07)',
+      lace: '#141014', text: '#141014', sub: '#6f6670', line: '#141014',
+      bow: '#141014', bowEdge: '#f7f4f1', cornerFiligree: '#141014',
+      garland: true, pearlFrame: true,
+      slotA: '#e6e1e4', slotB: '#cfc8cd',
+    },
+    lilac: {
+      name: 'Lilac Rose', jp: '薄紫の薔薇',
+      bg: '#c9b8d6', pattern: 'stripes', pc: 'rgba(255,255,255,.2)',
+      lace: '#1a1420', text: '#1a1420', sub: '#4e3d5e', line: '#1a1420',
+      bow: '#1a1420', bowEdge: '#e9e1f0', cornerFiligree: '#ffffff',
+      garland: false, pearlFrame: true,
+      slotA: '#e2d8ea', slotB: '#a996ba',
+    },
     requiem: {
       name: 'Requiem', jp: '鎮魂歌',
       bg: '#09080a', pattern: 'crosses', pc: 'rgba(220,215,225,.07)',
@@ -50,6 +74,22 @@ window.KB = window.KB || {};
       bow: '#09080a', bowEdge: '#e9e6ec', topper: 'cross', crossEdge: '#c9c4cf',
       arch: true, garland: true, pearlFrame: false,
       slotA: '#24222a', slotB: '#0e0d11',
+    },
+    shortcake: {
+      name: 'Strawberry Shortcake', jp: 'ショートケーキ',
+      bg: '#f4cdd5', pattern: 'gingham', pc: 'rgba(255,255,255,.45)',
+      lace: '#ffffff', text: '#7a1f3a', sub: '#a8566e', line: '#ffffff',
+      bow: '#ffffff', bowEdge: '#7a1f3a', photoFiligree: '#ffffff',
+      garland: false, pearlFrame: false,
+      slotA: '#fbe3e8', slotB: '#eeb4c1',
+    },
+    library: {
+      name: 'Old Library', jp: '図書館',
+      bg: '#1b130f', pattern: 'stripes', pc: 'rgba(0,0,0,.28)',
+      lace: '#e8dcc4', text: '#e8dcc4', sub: '#c2a368', line: '#c2a368',
+      bow: '#1b130f', bowEdge: '#c2a368', cornerFiligree: '#c2a368',
+      garland: true, pearlFrame: false,
+      slotA: '#3a2a20', slotB: '#160f0b',
     },
     vampire: {
       name: 'Vampire Tea Party', jp: '吸血鬼のお茶会',
@@ -59,49 +99,8 @@ window.KB = window.KB || {};
       arch: true, garland: true, pearlFrame: false,
       slotA: '#3a0a16', slotB: '#12030a',
     },
-    noir: {
-      name: 'Black Lace', jp: '黒レース',
-      bg: '#150a0e', pattern: 'damask', pc: 'rgba(244,236,226,.07)',
-      lace: '#f1e6da', text: '#f1e6da', sub: '#c9a7ae', line: '#f1e6da',
-      bow: '#8e1428', garland: true, pearlFrame: false,
-      slotA: '#3a1a22', slotB: '#1f0d12',
-    },
-    pearl: {
-      name: 'Pearl Cream', jp: '真珠',
-      bg: '#f8f0e3', pattern: 'dots', pc: 'rgba(90,20,38,.09)',
-      lace: '#1b0a10', text: '#3b0f1b', sub: '#7d5a60', line: '#3b0f1b',
-      bow: '#1b0a10', bowEdge: '#f8f0e3', garland: true, pearlFrame: true,
-      slotA: '#ead9cf', slotB: '#d9bfb7',
-    },
-    ichigo: {
-      name: 'Strawberry Parfait', jp: '苺パフェ',
-      bg: '#f4c9d3', pattern: 'gingham', pc: 'rgba(255,255,255,.42)',
-      lace: '#ffffff', text: '#8a1c3c', sub: '#a8566e', line: '#ffffff',
-      bow: '#b5172f', garland: false, pearlFrame: true,
-      slotA: '#fbe3e8', slotB: '#eeb4c1',
-    },
-    coffee: {
-      name: 'Coffee Jelly', jp: 'コーヒーゼリー',
-      bg: '#3b251d', pattern: 'checker', pc: 'rgba(240,226,200,.07)',
-      lace: '#efe0c6', text: '#efe0c6', sub: '#c2a368', line: '#c2a368',
-      bow: '#1b0a10', garland: true, pearlFrame: false,
-      slotA: '#5a3d31', slotB: '#2a1912',
-    },
-    bordeaux: {
-      name: 'Bordeaux Rose', jp: '薔薇',
-      bg: '#5c1426', pattern: 'stripes', pc: 'rgba(0,0,0,.16)',
-      lace: '#1b0a10', text: '#f6e3da', sub: '#e9c7a0', line: '#e9c7a0',
-      bow: '#1b0a10', bowEdge: '#e9c7a0', garland: true, pearlFrame: false,
-      slotA: '#7a2236', slotB: '#3f0c19',
-    },
-    melon: {
-      name: 'Melon Soda Velvet', jp: 'メロンソーダ',
-      bg: '#24392d', pattern: 'dots', pc: 'rgba(240,226,200,.08)',
-      lace: '#f4ead8', text: '#f4ead8', sub: '#b8d4a8', line: '#f4ead8',
-      bow: '#b5172f', garland: true, pearlFrame: true,
-      slotA: '#3b5a47', slotB: '#1a2a20',
-    },
   };
+
 
   /* ───────── backgrounds ───────── */
   function drawPattern(c, f, W, H) {
@@ -229,8 +228,8 @@ window.KB = window.KB || {};
     }
   }
 
-  function drawGarland(c, W, G) {
-    const y = 36, x0 = 34, x1 = W - 34;
+  function drawGarland(c, W, G, inset) {
+    const y = 36, x0 = inset || 34, x1 = W - (inset || 34);
     const n = W > 900 ? 5 : 3;
     const seg = (x1 - x0) / n;
     const depth = Math.min(11, (G.top - 20 - y) / 2);
@@ -343,14 +342,14 @@ window.KB = window.KB || {};
     c.fillStyle = f.sub;
     diamond(c, cx, y0 + 42 * k, 6 * k);
 
-    const caption = (o.caption || '').trim() || 'Kurobara';
+    const caption = (o.caption || '').trim() || 'Dolly Noir';
     c.fillStyle = f.text;
     fitFont(c, caption, '"Grenze Gotisch", Georgia, serif', Math.round(68 * k), G.w - 120, '600');
     c.fillText(caption, cx, y0 + 114 * k);
 
     c.fillStyle = f.sub;
     c.font = `${Math.round(17 * k)}px "Zen Antique", serif`;
-    const sub = '喫茶 黒薔薇 ・ 写真館';
+    const sub = '黒と白の人形写真館';
     c.fillText(sub, cx, y0 + 152 * k);
     const sw = c.measureText(sub).width / 2 + 18 * k;
     diamond(c, cx - sw, y0 + 146 * k, 4 * k);
@@ -364,9 +363,56 @@ window.KB = window.KB || {};
   }
 
   /* ───────── main renderer ───────── */
+  /* ───────── filigree scrollwork (drawn for a top-left corner) ───────── */
+  const FILIGREE = [
+    'M6 6C30 4 52 8 64 18C72 25 70 36 61 36C54 36 52 28 58 26',
+    'M6 6C4 30 8 52 18 64C25 72 36 70 36 61C36 54 28 52 26 58',
+    'M10 10C22 26 30 32 40 30C46 29 46 22 41 22',
+    'M64 18C76 10 88 10 94 14',
+    'M18 64C10 76 10 88 14 94',
+    'M30 8C34 14 40 15 44 12',
+    'M8 30C14 34 15 40 12 44',
+  ];
+  let filigreePaths = null;
+
+  function drawFiligree(c, x, y, size, color, sx, sy) {
+    if (!filigreePaths) filigreePaths = FILIGREE.map((d) => new Path2D(d));
+    const k = size / 100;
+    c.save();
+    c.translate(x, y);
+    c.scale(sx * k, sy * k);
+    c.strokeStyle = color;
+    c.fillStyle = color;
+    c.lineWidth = 2.6 / k;
+    c.lineCap = 'round';
+    c.lineJoin = 'round';
+    c.shadowColor = 'rgba(0,0,0,.25)';
+    c.shadowBlur = 3;
+    for (const p of filigreePaths) c.stroke(p);
+    for (const [px, py, r] of [[6, 6, 4], [94, 14, 2.4], [14, 94, 2.4], [58, 26, 2], [26, 58, 2], [41, 22, 1.8]]) {
+      c.beginPath(); c.arc(px, py, r, 0, TAU); c.fill();
+    }
+    c.restore();
+  }
+
+  // Orange LED date, like an old point-and-shoot.
+  function drawStamp(c, sl, date) {
+    const p = (n) => String(n).padStart(2, '0');
+    const text = `'${p(date.getFullYear() % 100)} ${p(date.getMonth() + 1)} ${p(date.getDate())}`;
+    c.save();
+    c.font = `${Math.round(sl.h * 0.085)}px "VT323", "Courier New", monospace`;
+    c.textAlign = 'right';
+    c.textBaseline = 'alphabetic';
+    c.fillStyle = '#ff9a3c';
+    c.shadowColor = 'rgba(255,120,30,.8)';
+    c.shadowBlur = 6;
+    c.fillText(text, sl.x + sl.w - sl.w * 0.045, sl.y + sl.h - sl.h * 0.05);
+    c.restore();
+  }
+
   function renderStrip(canvas, o) {
     const G = geometry(o.layout);
-    const f = FRAMES[o.frame] || FRAMES.noir;
+    const f = FRAMES[o.frame] || FRAMES.kuro;
     const s = o.scale || 1;
     canvas.width = Math.round(G.w * s);
     canvas.height = Math.round(G.h * s);
@@ -382,12 +428,25 @@ window.KB = window.KB || {};
       if (f.arch) { archPath(c, sl.x, sl.y, sl.w, sl.h); c.clip(); }
       if (img) c.drawImage(img, sl.x, sl.y, sl.w, sl.h);
       else drawPlaceholder(c, sl, f, i);
+      if (img && o.stamp) drawStamp(c, sl, o.date || new Date());
       c.restore();
       drawPhotoFrame(c, sl, f);
+      if (f.photoFiligree) {
+        const fs = sl.w * 0.2;
+        drawFiligree(c, sl.x - 3, sl.y - 3, fs, f.photoFiligree, 1, 1);
+        drawFiligree(c, sl.x + sl.w + 3, sl.y + sl.h + 3, fs, f.photoFiligree, -1, -1);
+      }
     });
 
     drawLace(c, f, G.w, G.h);
-    if (f.garland) drawGarland(c, G.w, G);
+    if (f.cornerFiligree) {
+      const fs = 92 * G.k, m = 20;
+      drawFiligree(c, m, m, fs, f.cornerFiligree, 1, 1);
+      drawFiligree(c, G.w - m, m, fs, f.cornerFiligree, -1, 1);
+      drawFiligree(c, m, G.h - m, fs, f.cornerFiligree, 1, -1);
+      drawFiligree(c, G.w - m, G.h - m, fs, f.cornerFiligree, -1, -1);
+    }
+    if (f.garland) drawGarland(c, G.w, G, f.cornerFiligree ? 104 * G.k : 0);
 
     c.save();
     const top = G.slots[0].y;

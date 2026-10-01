@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kurobara Photo Booth</title>
-  <meta name="description" content="喫茶 黒薔薇 — a gothic lolita kissaten photo booth. Lace, pearls & coffee jelly.">
+  <title>Dolly Noir</title>
+  <meta name="description" content="Dolly Noir — a black &amp; white gothic lolita photo booth. Lace, ribbons, pearls and filigree.">
   <meta name="theme-color" content="#0a0507">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%80%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Grenze+Gotisch:wght@400;500;600;700&family=IM+Fell+English:ital@0;1&family=Pinyon+Script&family=Zen+Antique&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Grenze+Gotisch:wght@400;500;600;700&family=IM+Fell+English:ital@0;1&family=Pinyon+Script&family=VT323&family=Zen+Antique&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -19,8 +19,8 @@
 
   <header class="topbar">
     <a href="#/" class="brand">
-      <span class="brand-jp">喫茶 黒薔薇</span>
-      <span class="brand-en">Kurobara Photo Booth</span>
+      <span class="brand-jp">人形写真館</span>
+      <span class="brand-en">Dolly Noir</span>
     </a>
     <nav class="steps" aria-label="Steps">
       <a href="#/menu" data-step="menu"><b>壱</b> menu</a>
@@ -33,44 +33,43 @@
     <!-- ───────────── HOME ───────────── -->
     <section id="screen-home" class="screen">
       <div class="card lace arch home-card">
-        <div class="open-sign"><span class="lamp"></span>営業中 · OPEN</div>
-        <p class="welcome-jp">いらっしゃいませ</p>
+        <p class="welcome-jp">ようこそ · 黒と白の人形写真館</p>
         <div class="title-wrap">
           <span class="candle" aria-hidden="true"></span>
-          <h1 class="title">Kurobara</h1>
+          <h1 class="title">Dolly Noir</h1>
           <span class="candle tall" aria-hidden="true"></span>
         </div>
-        <p class="title-script">kissa &amp; photo booth</p>
+        <p class="title-script">a gothic lolita photo booth</p>
         <div class="pearl-row" aria-hidden="true"></div>
 
         <ol class="menu-list">
-          <li><span>Choose your set &amp; tablecloth</span><i></i><span>✝</span></li>
-          <li><span>Strike a pose in the booth</span><i></i><span>☾</span></li>
-          <li><span>Decorate with lace &amp; pearls</span><i></i><span>♱</span></li>
-          <li><span>Take your print home</span><i></i><span>♡</span></li>
+          <li><span>Choose a layout &amp; frame</span><i></i><span>✝</span></li>
+          <li><span>Pose like a porcelain doll</span><i></i><span>☾</span></li>
+          <li><span>Dress it in ribbons &amp; pearls</span><i></i><span>♱</span></li>
+          <li><span>Keep your print forever</span><i></i><span>♡</span></li>
         </ol>
 
-        <a class="btn btn-primary btn-big" href="#/menu">Enter the café ✝</a>
-        <p class="fine">est. 1979 · Tokyo · open till the last candle burns out</p>
+        <a class="btn btn-primary btn-big" href="#/menu">Step inside ✝</a>
+        <p class="fine">black lace · white lace · tea at midnight</p>
       </div>
     </section>
 
     <!-- ───────────── MENU / FRAME SELECT ───────────── -->
     <section id="screen-menu" class="screen" hidden>
       <div class="card lace">
-        <p class="eyebrow">ご注文はお決まりですか？</p>
-        <h2 class="section-title">Today's Menu</h2>
-        <p class="sub">Have you decided on your order, darling?</p>
+        <p class="eyebrow">お気に入りをえらんでね</p>
+        <h2 class="section-title">Choose Your Look</h2>
+        <p class="sub">Pick a layout, then a frame, darling.</p>
         <div class="pearl-row" aria-hidden="true"></div>
 
-        <h3 class="menu-heading"><span>Sets</span><small>セット</small></h3>
+        <h3 class="menu-heading"><span>Layouts</span><small>レイアウト</small></h3>
         <div id="layout-list" class="layout-list"></div>
 
-        <h3 class="menu-heading"><span>Tablecloths</span><small>フレーム</small></h3>
+        <h3 class="menu-heading"><span>Frames</span><small>フレーム</small></h3>
         <div id="frame-grid" class="frame-grid"></div>
 
         <div class="actions">
-          <a class="btn btn-primary btn-big" href="#/booth">Order &amp; go to the booth ✦</a>
+          <a class="btn btn-primary btn-big" href="#/booth">To the booth ✝</a>
         </div>
       </div>
     </section>
@@ -111,7 +110,7 @@
         </div>
 
         <aside class="card lace tray-card">
-          <p class="eyebrow">伝票 · your order</p>
+          <p class="eyebrow">フィルム · your photos</p>
           <p id="tray-hint" class="tray-hint"></p>
           <div id="tray" class="tray"></div>
           <a id="btn-next" class="btn btn-primary" href="#/result" aria-disabled="true">Decorate ✦</a>
@@ -133,7 +132,7 @@
           <div class="pearl-row" aria-hidden="true"></div>
 
           <div class="control">
-            <span class="control-label">Tablecloth <small>フレーム</small></span>
+            <span class="control-label">Frame <small>フレーム</small></span>
             <div id="frame-swatches" class="swatches"></div>
           </div>
 
@@ -146,6 +145,7 @@
             <label class="control-label" for="caption">Caption <small>ひとこと</small></label>
             <input id="caption" class="text-input" type="text" maxlength="28" autocomplete="off">
             <label class="check"><input id="show-date" type="checkbox" checked> print today's date</label>
+            <label class="check"><input id="show-stamp" type="checkbox"> digicam date stamp on photos</label>
           </div>
 
           <div class="control">
@@ -165,9 +165,9 @@
           <div class="actions stack">
             <button id="btn-download" class="btn btn-primary btn-big" type="button">Download ♡</button>
             <a class="btn btn-ghost" href="#/booth">Retake</a>
-            <button id="btn-new" class="btn btn-ghost" type="button">New order</button>
+            <button id="btn-new" class="btn btn-ghost" type="button">Start over</button>
           </div>
-          <p class="fine">またのお越しをお待ちしております<br>we await your next visit ♰</p>
+          <p class="fine">またね ♡<br>see you again, little doll ♱</p>
         </div>
       </div>
     </section>

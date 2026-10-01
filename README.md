@@ -1,15 +1,15 @@
-# 喫茶 黒薔薇 · Kurobara Photo Booth 🎀
+# Dolly Noir · 黒と白の人形写真館 🎀
 
-A gothic lolita × retro Tokyo kissaten photo booth that runs in your browser. Lace, pearls and coffee jelly ♰
+A black & white gothic lolita photo booth that runs in your browser. Lace, ribbons, pearls and filigree ♱
 
 ## How it works
 
-1. **Menu** (`#/menu`): pick a *set* (Classic Strip, Trio, Duo or Postcard grid) and a *tablecloth* (frame):
-   Requiem, Vampire Tea Party, Black Lace, Pearl Cream, Strawberry Parfait, Coffee Jelly, Bordeaux Rose or Melon Soda Velvet.
-2. **Booth** (`#/booth`): choose a filter (Natural, Kissaten, Noir, Rosé, Showa Film, Dreamy) and a timer,
+1. **Menu** (`#/menu`): pick a layout (Classic Strip, Trio, Duo or Postcard grid) and a frame:
+   Kuro, Shiro, Lilac Rose, Requiem, Strawberry Shortcake, Old Library or Vampire Tea Party.
+2. **Booth** (`#/booth`): choose a filter (Natural, Digicam, Faded, Monochrome, Lilac, Rosé, Dreamy) and a timer,
    then strike your poses. Tap any thumbnail to retake that one, or upload photos instead of using the camera.
 3. **Print** (`#/result`): switch frames and filters, write a caption, add stickers (ribbons, hearts, crosses,
-   cherries, coffee, bats, roses, crowns, candles, coffins, moons…) and drag them around. Then download your strip as a PNG.
+   cherries, teacups, shortcake, bats, red & lilac roses, crowns, candles, coffins, moons…), and an optional orange digicam date stamp and drag them around. Then download your strip as a PNG.
 
 Everything stays on your device. No photos are uploaded anywhere.
 
@@ -32,7 +32,7 @@ Your booth will be live at `https://<username>.github.io/photobooth/`.
 ## Files
 
 - `index.html`: the four screens
-- `styles.css`: lace, pearls and the kissaten theme
+- `styles.css`: lace, pearls and filigree
 - `js/frames.js`: layouts, frame designs and the strip renderer
 - `js/filters.js`: photo filters (baked into the print)
 - `js/stickers.js`: vector stickers

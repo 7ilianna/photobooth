@@ -7,8 +7,8 @@
 
   const state = {
     layout: 'strip4',
-    frame: 'requiem',
-    filter: 'kissaten',
+    frame: 'kuro',
+    filter: 'digicam',
     timer: 3,
     shots: [],          // raw 4:3 canvases, mirrored like a mirror
     shotsVersion: 0,
@@ -16,7 +16,8 @@
     filteredKey: '',
     stickers: [],
     selected: -1,
-    caption: 'Kurobara',
+    caption: 'Dolly Noir',
+    stamp: false,
     showDate: true,
   };
 
@@ -84,7 +85,7 @@
           <span class="mi-name">${l.name}<small>${l.jp}</small></span>
           <span class="mi-desc">${l.desc}</span>
         </span>
-        <span class="mi-price">${l.price}</span>`;
+        <span class="mi-price">×${l.count}</span>`;
       b.addEventListener('click', () => { setLayout(id); renderMenu(); });
       list.append(b);
     }
@@ -353,6 +354,7 @@
       selected,
       caption: state.caption,
       showDate: state.showDate,
+      stamp: state.stamp,
     };
   }
 
@@ -376,6 +378,7 @@
     });
     $('#caption').value = state.caption;
     $('#show-date').checked = state.showDate;
+    $('#show-stamp').checked = state.stamp;
     renderStickerPalette();
     syncStickerEdit();
     drawResult();
@@ -535,6 +538,7 @@
 
   $('#caption').addEventListener('input', (e) => { state.caption = e.target.value; drawResult(); });
   $('#show-date').addEventListener('change', (e) => { state.showDate = e.target.checked; drawResult(); });
+  $('#show-stamp').addEventListener('change', (e) => { state.stamp = e.target.checked; drawResult(); });
 
   $('#btn-download').addEventListener('click', () => {
     ensureFiltered();
@@ -542,7 +546,7 @@
     renderStrip(out, stripOptions(-1));
     const d = new Date();
     const p = (n) => String(n).padStart(2, '0');
-    const name = `kurobara-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.png`;
+    const name = `dolly-noir-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.png`;
     out.toBlob((blob) => {
       if (!blob) { toast('couldn’t save the print, sorry!'); return; }
       const url = URL.createObjectURL(blob);
@@ -553,7 +557,7 @@
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 5000);
-      toast('ありがとうございました ♡ saved!');
+      toast('saved to your downloads ♡');
     }, 'image/png');
   });
 
@@ -575,7 +579,8 @@
       '600 64px "Grenze Gotisch"',
       '17px "Zen Antique"',
       'italic 20px "IM Fell English"',
-    ].map((f) => document.fonts.load(f, '喫茶黒薔薇写真館 Kurobara 0123456789'))).then(() => {
+      '30px "VT323"',
+    ].map((f) => document.fonts.load(f, '黒と白の人形写真館 Dolly Noir 0123456789'))).then(() => {
       if (current === 'menu') renderMenu();
       if (current === 'result') drawResult();
     }).catch(() => {});

@@ -139,7 +139,7 @@ window.KB = window.KB || {};
     },
 
     cup: {
-      name: 'Coffee',
+      name: 'Teacup',
       draw(c) {
         c.lineCap = 'round';
         c.strokeStyle = '#a68a80'; c.lineWidth = 3;
@@ -159,7 +159,7 @@ window.KB = window.KB || {};
         c.bezierCurveTo(-20, 28, -32, 14, -32, -14);
         c.closePath(); c.fill(); c.stroke();
         c.beginPath(); c.ellipse(0, -14, 32, 7, 0, 0, TAU); c.fill(); c.stroke();
-        c.fillStyle = '#4a2a1d';
+        c.fillStyle = '#a5582a';
         c.beginPath(); c.ellipse(0, -13.5, 27, 4.6, 0, 0, TAU); c.fill();
         c.save(); c.translate(0, 7); c.scale(.24, .24); heartPath(c);
         c.fillStyle = '#b5172f'; c.fill(); c.restore();
@@ -199,15 +199,18 @@ window.KB = window.KB || {};
 
     rose: {
       name: 'Rose',
-      draw(c) {
+      draw(c, o) {
+        const petal = (o && o.petal) || '#8e1428';
+        const dark = (o && o.dark) || '#4d0915';
+        const edge = (o && o.edge) || '#3b0611';
         c.fillStyle = '#3f5a3a'; c.strokeStyle = '#1f2e1c'; c.lineWidth = 2.5;
         for (const [x, r] of [[-28, -.6], [28, .6]]) {
           c.beginPath(); c.ellipse(x, 28, 20, 8, r, 0, TAU); c.fill(); c.stroke();
         }
         c.beginPath(); c.arc(0, 0, 34, 0, TAU);
-        c.fillStyle = '#8e1428'; c.fill();
-        c.lineWidth = 3; c.strokeStyle = '#3b0611'; c.stroke();
-        c.strokeStyle = '#4d0915'; c.lineWidth = 4; c.lineCap = 'round';
+        c.fillStyle = petal; c.fill();
+        c.lineWidth = 3; c.strokeStyle = edge; c.stroke();
+        c.strokeStyle = dark; c.lineWidth = 4; c.lineCap = 'round';
         const arcs = [[0, 0, 26, .2, 1.45], [2, -2, 19, 1.1, 2.35], [-2, 1, 12, 0, 1.5], [1, 0, 5, .8, 2.4], [-1, 3, 26, 1.6, 2.1]];
         for (const [x, y, r, a, b] of arcs) {
           c.beginPath(); c.arc(x, y, r, a * Math.PI, b * Math.PI); c.stroke();
@@ -233,6 +236,52 @@ window.KB = window.KB || {};
           c.beginPath(); c.arc(x, 20.5, 4.5, 0, TAU);
           c.fillStyle = col; c.fill();
         }
+      },
+    },
+
+    lilacRose: {
+      name: 'Lilac rose',
+      draw(c) {
+        STICKERS.rose.draw(c, { petal: '#9a7bb5', dark: '#4a3560', edge: '#2c1f3a' });
+      },
+    },
+
+    cake: {
+      name: 'Shortcake',
+      draw(c) {
+        c.lineJoin = 'round';
+        c.strokeStyle = '#4a3a3a'; c.lineWidth = 2.5;
+        // sponge
+        c.fillStyle = '#f3d9a4';
+        c.beginPath(); c.rect(-38, -6, 76, 40); c.fill(); c.stroke();
+        // cream layers with strawberry halves
+        c.fillStyle = '#fffaf2';
+        c.fillRect(-37, 5, 74, 7);
+        c.fillStyle = '#d8283f';
+        for (const x of [-26, -6, 14, 32]) { c.beginPath(); c.arc(x, 9, 5, Math.PI, 0); c.fill(); }
+        c.fillStyle = '#fffaf2';
+        c.fillRect(-37, 20, 74, 4);
+        // frosting top
+        c.fillStyle = '#fffaf2';
+        c.beginPath();
+        c.moveTo(-40, -4);
+        c.quadraticCurveTo(-40, -16, -28, -16);
+        c.lineTo(28, -16);
+        c.quadraticCurveTo(40, -16, 40, -4);
+        c.closePath(); c.fill(); c.stroke();
+        // whipped cream dollop
+        c.beginPath(); c.arc(4, -22, 11, 0, TAU); c.fill(); c.stroke();
+        // strawberry
+        c.fillStyle = '#d8283f';
+        c.beginPath();
+        c.moveTo(4, -50);
+        c.bezierCurveTo(18, -50, 16, -34, 4, -26);
+        c.bezierCurveTo(-8, -34, -10, -50, 4, -50);
+        c.fill(); c.stroke();
+        c.fillStyle = '#fff3c4';
+        for (const [x, y] of [[0, -44], [8, -42], [4, -36]]) { c.beginPath(); c.arc(x, y, 1.2, 0, TAU); c.fill(); }
+        c.fillStyle = '#5b7a4c';
+        c.beginPath(); c.ellipse(-2, -51, 6, 2.5, -.4, 0, TAU); c.ellipse(10, -51, 6, 2.5, .4, 0, TAU); c.fill();
       },
     },
 

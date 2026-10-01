@@ -28,29 +28,35 @@ window.KB = window.KB || {};
       css: 'none',
       ops: [],
     },
-    kissaten: {
-      name: 'Kissaten', jp: '喫茶',
-      css: 'sepia(.45) saturate(1.1) contrast(1.05) brightness(1.04)',
-      ops: [op.sepia(0.45), op.sat(1.1), op.contrast(1.05), op.bright(1.04), op.tint(8, 2, -6)],
-      vignette: 0.35, grain: 6,
+    digicam: {
+      name: 'Digicam', jp: 'デジカメ',
+      css: 'brightness(1.12) contrast(1.12) saturate(.85)',
+      ops: [op.bright(1.1), op.contrast(1.14), op.sat(0.85), op.tint(-4, 0, 8)],
+      vignette: 0.3, grain: 5,
     },
-    noir: {
-      name: 'Noir', jp: '黒',
+    faded: {
+      name: 'Faded', jp: '色褪せ',
+      css: 'contrast(.8) saturate(.55) sepia(.2) brightness(1.08)',
+      ops: [op.fade(40), op.sat(0.55), op.tint(10, 6, 0), op.contrast(0.85)],
+      vignette: 0.2, grain: 10,
+    },
+    mono: {
+      name: 'Monochrome', jp: '白黒',
       css: 'grayscale(1) contrast(1.3) brightness(1.02)',
       ops: [op.gray(), op.contrast(1.3), op.bright(1.02)],
       vignette: 0.45, grain: 14,
+    },
+    lilac: {
+      name: 'Lilac', jp: '薄紫',
+      css: 'grayscale(.55) sepia(.2) hue-rotate(220deg) saturate(1.3) brightness(1.05) contrast(.95)',
+      ops: [op.sat(0.45), op.tint(12, -2, 22), op.bright(1.04), op.contrast(0.95)],
+      vignette: 0.2,
     },
     rose: {
       name: 'Rosé', jp: '薔薇色',
       css: 'sepia(.2) saturate(1.15) hue-rotate(-15deg) brightness(1.06) contrast(.95)',
       ops: [op.sepia(0.15), op.tint(18, -4, 8), op.sat(1.1), op.bright(1.05), op.contrast(0.95)],
       vignette: 0.15,
-    },
-    showa: {
-      name: 'Showa Film', jp: '昭和',
-      css: 'contrast(.88) brightness(1.06) saturate(.8) sepia(.15)',
-      ops: [op.fade(28), op.sat(0.8), op.tint(6, 4, -10), op.contrast(0.92)],
-      vignette: 0.25, grain: 12,
     },
     dreamy: {
       name: 'Dreamy', jp: '夢',
@@ -59,6 +65,7 @@ window.KB = window.KB || {};
       glow: 0.4,
     },
   };
+
 
   function applyFilter(src, id) {
     const f = FILTERS[id] || FILTERS.natural;
