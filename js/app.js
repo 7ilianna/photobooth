@@ -102,81 +102,146 @@
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#dialog').hidden) closeDialog(); });
 
 
-  /* ───────── frame select: a turning carousel + character profile ───────── */
-  const ids = Object.keys(THEMES);
+  /* ───────── frame select: a gliding cover-flow wheel + character profile ───────── */
+  // The art frames turn on the wheel; Plain (black or white) sits underneath it.
+  const wheelIds = Object.keys(THEMES).filter((id) => !THEMES[id].plain);
+  const plainId = Object.keys(THEMES).find((id) => THEMES[id].plain);
+  const N = wheelIds.length;
   const ring = $('#car-ring');
-  let carPos = Math.max(0, ids.indexOf(state.theme)); // keeps counting past n so it can spin forever
-  const wrap = (n) => ((n % ids.length) + ids.length) % ids.length;
+  const carousel = $('#carousel');
+  const wrap = (n) => ((n % N) + N) % N;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isPlain = () => !!THEMES[state.theme].plain;
+  const cardSpacing = () => (ring.querySelector('.car-card')?.offsetWidth || 220) * 0.62;
+
+  let pos = Math.max(0, wheelIds.indexOf(state.theme)); // where the wheel is drawn (keeps counting past N)
+  let target = pos;                                      // where it is easing towards
+  let lastIndex = wrap(Math.round(pos));
+  let raf = 0;
+
+  // One chime per turn, however fast the wheel spins
+  let lastChime = 0;
+  function chime() {
+    const now = performance.now();
+    if (now - lastChime < 140) return;
+    lastChime = now;
+    sound.chime();
+  }
 
   function buildCarousel() {
     ring.innerHTML = '';
-    ids.forEach((id, n) => {
+    wheelIds.forEach((id, n) => {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'car-card';
       b.dataset.n = n;
       b.setAttribute('aria-label', THEMES[id].name);
-      const cv = document.createElement('canvas');
-      b.append(cv);
+      b.append(document.createElement('canvas'));
       const label = document.createElement('span');
       label.textContent = `${ROMAN[n]} · ${THEMES[id].name}`;
       b.append(label);
-      b.addEventListener('click', () => {
-        const diff = wrap(n - carPos);
-        if (diff) turn(diff > ids.length / 2 ? diff - ids.length : diff, false);
+      b.addEventListener('click', (e) => {
+        if (moved) { e.preventDefault(); return; }
+        goTo(nearest(n));
       });
       ring.append(b);
     });
     paintCarousel();
   }
 
+  // The copy of frame n closest to where the wheel is heading
+  function nearest(n) {
+    const base = Math.round(target);
+    const diff = wrap(n - base);
+    return base + (diff > N / 2 ? diff - N : diff);
+  }
+
   function paintCarousel() {
     ring.querySelectorAll('.car-card').forEach((b) => {
-      renderStrip(b.querySelector('canvas'), { theme: ids[b.dataset.n], tone: state.tone, scale: 0.26, caption: state.caption, showDate: false });
+      renderStrip(b.querySelector('canvas'), { theme: wheelIds[b.dataset.n], scale: 0.26, caption: state.caption, showDate: false });
+    });
+    document.querySelectorAll('.plain-opt').forEach((b) => {
+      renderStrip(b.querySelector('canvas'), { theme: plainId, tone: b.dataset.plain, scale: 0.1, caption: state.caption, showDate: false });
     });
   }
 
+  // Lay every card out along a gentle arc around the current position
   function layoutCarousel() {
-    const n = ids.length, step = 360 / n;
-    const card = ring.querySelector('.car-card');
-    const w = card ? card.offsetWidth : 220;
-    const radius = Math.round((w / 2) / Math.tan(Math.PI / n) * 1.25);
-    ring.style.transform = `translateZ(${-radius}px) rotateY(${-carPos * step}deg)`;
+    const spacing = cardSpacing();
+    const resting = isPlain();
     ring.querySelectorAll('.car-card').forEach((b) => {
-      const k = +b.dataset.n;
-      b.style.transform = `rotateY(${k * step}deg) translateZ(${radius}px)`;
-      const front = k === wrap(carPos);
-      b.classList.toggle('is-front', front);
-      b.tabIndex = front ? 0 : -1;
-      b.setAttribute('aria-current', front ? 'true' : 'false');
+      let off = +b.dataset.n - pos;
+      off = (((off % N) + N + N / 2) % N) - N / 2; // wrap into [-N/2, N/2)
+      const a = Math.abs(off);
+      const x = off * spacing * (1 - Math.min(a, 2) * 0.1);
+      const rot = Math.max(-55, Math.min(55, -off * 40));
+      const z = -Math.min(a, 2.5) * 160;
+      const scale = 1 - Math.min(a, 2) * 0.08;
+      const opacity = Math.max(0, Math.min(1, 1.9 - a));
+      b.style.transform = `translateX(${x.toFixed(2)}px) translateZ(${z.toFixed(1)}px) rotateY(${rot.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+      b.style.opacity = opacity.toFixed(3);
+      b.style.zIndex = String(100 - Math.round(a * 10));
+      b.style.filter = `brightness(${((1 - Math.min(a, 1.5) * 0.4) * (resting ? 0.5 : 1)).toFixed(3)})`;
+      b.style.pointerEvents = opacity < 0.2 ? 'none' : '';
+      b.classList.toggle('is-front', a < 0.5 && !resting);
+      b.tabIndex = a < 0.5 ? 0 : -1;
     });
   }
 
-  function turn(d, withSound) {
-    carPos += d;
-    state.theme = ids[wrap(carPos)];
-    if (withSound) sound.chime();
+  // Ease towards the target every frame; update the profile as frames pass the front
+  function tick() {
+    raf = 0;
+    const d = target - pos;
+    pos = reduceMotion || Math.abs(d) < 0.0005 ? target : pos + d * 0.12;
     layoutCarousel();
+    const idx = wrap(Math.round(pos));
+    if (idx !== lastIndex && !isPlain()) {
+      lastIndex = idx;
+      state.theme = wheelIds[idx];
+      chime();
+      renderProfile();
+    }
+    if (pos !== target || carDrag) raf = requestAnimationFrame(tick);
+  }
+  function kick() { if (!raf) raf = requestAnimationFrame(tick); }
+
+  // Touching the wheel while Plain is chosen brings the front art frame back
+  function leavePlain() {
+    if (!isPlain()) return;
+    lastIndex = wrap(Math.round(target));
+    state.theme = wheelIds[lastIndex];
+    syncPlainButtons();
     renderProfile();
   }
 
+  function goTo(t) {
+    leavePlain();
+    target = t;
+    kick();
+  }
+
   function renderThemes() {
-    carPos = carPos - wrap(carPos) + Math.max(0, ids.indexOf(state.theme));
-    if (ring.children.length !== ids.length) buildCarousel(); else paintCarousel();
+    if (ring.children.length !== N) buildCarousel(); else paintCarousel();
+    if (!isPlain()) {
+      const i = wheelIds.indexOf(state.theme);
+      pos = target = Math.round(pos) - wrap(Math.round(pos)) + i;
+      lastIndex = i;
+    }
     layoutCarousel();
+    syncPlainButtons();
     renderProfile();
   }
 
   function renderProfile() {
-    const i = ids.indexOf(state.theme);
     const t = THEMES[state.theme];
-    $('#profile-no').textContent = `Frame No.${String(i + 1).padStart(2, '0')} / ${String(ids.length).padStart(2, '0')}`;
-    $('#profile-name').textContent = t.name;
+    const toneName = state.tone === 'white' ? 'White' : 'Black';
+    $('#profile-no').textContent = t.plain
+      ? 'Plain frame'
+      : `Frame No.${String(wheelIds.indexOf(state.theme) + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}`;
+    $('#profile-name').textContent = t.plain ? `Plain ${toneName}` : t.name;
     $('#profile-tagline').textContent = t.tagline || '';
     $('#profile-bio').textContent = t.bio || '';
     $('#profile-cv').textContent = t.cv ? `CV: ${t.cv}` : '';
-    $('#tone-picker').hidden = !t.plain;
-    document.querySelectorAll('#tone-picker [data-tone]').forEach((b) => pressed(b, b.dataset.tone === state.tone));
 
     const pips = (n, glyph) => `${glyph.repeat(n)}<i>${glyph.repeat(5 - n)}</i>`;
     $('#profile-meters').innerHTML =
@@ -196,39 +261,78 @@
     $('#coming-soon').hidden = !Object.values(THEMES).some((x) => x.placeholder && !x.image);
   }
 
-  // Turn the wheel: arrows, mouse wheel / trackpad, swipe, arrow keys
-  $('#car-prev').addEventListener('click', () => turn(-1, false));
-  $('#car-next').addEventListener('click', () => turn(1, false));
-  const carousel = $('#carousel');
-  let wheelLock = 0;
+  // Drag (mouse or finger) scrubs the wheel; a flick lets it coast a little
+  let carDrag = null;
+  let moved = false;
+  carousel.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0 || e.target.closest('.car-arrow')) return;
+    const now = performance.now();
+    carDrag = { x: e.clientX, start: target, lastX: e.clientX, lastT: now, v: 0 };
+    moved = false;
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!carDrag) return;
+    const dx = e.clientX - carDrag.x;
+    if (!moved && Math.abs(dx) < 6) return;
+    if (!moved) { moved = true; leavePlain(); }
+    const now = performance.now();
+    carDrag.v = (e.clientX - carDrag.lastX) / Math.max(1, now - carDrag.lastT);
+    carDrag.lastX = e.clientX;
+    carDrag.lastT = now;
+    pos = target = carDrag.start - dx / cardSpacing();
+    kick();
+  });
+  window.addEventListener('pointerup', () => {
+    if (!carDrag) return;
+    if (moved) {
+      const fling = Math.max(-2, Math.min(2, (-carDrag.v * 220) / cardSpacing()));
+      target = Math.round(target + fling);
+      kick();
+    }
+    carDrag = null;
+    setTimeout(() => { moved = false; }, 0);
+  });
+
+  // Trackpads scroll continuously; a mouse wheel notch moves one frame
+  let wheelSnap = 0;
   carousel.addEventListener('wheel', (e) => {
     const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    if (Math.abs(d) < 4) return;
+    if (!d) return;
     e.preventDefault();
-    const now = Date.now();
-    if (now < wheelLock) return;
-    wheelLock = now + 420;
-    turn(d > 0 ? 1 : -1, true);
+    leavePlain();
+    const unit = e.deltaMode === 1 ? 0.34 : 1 / 180;
+    target += Math.max(-1, Math.min(1, d * unit));
+    kick();
+    clearTimeout(wheelSnap);
+    wheelSnap = setTimeout(() => { target = Math.round(target); kick(); }, 160);
   }, { passive: false });
-  let swipeX = null;
-  carousel.addEventListener('pointerdown', (e) => { swipeX = e.clientX; });
-  carousel.addEventListener('pointerup', (e) => {
-    if (swipeX === null) return;
-    const dx = e.clientX - swipeX;
-    swipeX = null;
-    if (Math.abs(dx) > 40) turn(dx < 0 ? 1 : -1, true);
-  });
+
+  $('#car-prev').addEventListener('click', () => goTo(Math.round(target) - 1));
+  $('#car-next').addEventListener('click', () => goTo(Math.round(target) + 1));
   carousel.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') { e.preventDefault(); turn(-1, true); }
-    if (e.key === 'ArrowRight') { e.preventDefault(); turn(1, true); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(Math.round(target) - 1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); goTo(Math.round(target) + 1); }
   });
   window.addEventListener('resize', () => { if (current === 'themes') layoutCarousel(); });
 
-  // Plain frame: black or white border
+  // Plain Black / Plain White, under the wheel
+  function syncPlainButtons() {
+    const plain = isPlain();
+    document.querySelectorAll('.plain-opt').forEach((b) => pressed(b, plain && b.dataset.plain === state.tone));
+    carousel.classList.toggle('is-resting', plain);
+  }
+  document.querySelectorAll('.plain-opt').forEach((b) => b.addEventListener('click', () => {
+    state.theme = plainId;
+    state.tone = b.dataset.plain;
+    syncPlainButtons();
+    layoutCarousel();
+    renderProfile();
+  }));
+
+  // Plain border colour on the print screen
   function setTone(tone) {
     state.tone = tone;
     document.querySelectorAll('[data-tone]').forEach((b) => pressed(b, b.dataset.tone === tone));
-    if (current === 'themes') { paintCarousel(); renderProfile(); }
     if (current === 'result') drawResult();
   }
   document.querySelectorAll('[data-tone]').forEach((b) => b.addEventListener('click', () => setTone(b.dataset.tone)));
@@ -776,7 +880,8 @@
   document.addEventListener('click', (e) => {
     const el = e.target.closest('button, a[href], label.btn, input[type="checkbox"]');
     if (!el || el.disabled || el.getAttribute('aria-disabled') === 'true' || el.id === 'sound-toggle') return;
-    sound.chime();
+    if (el.classList.contains('car-card') && moved) return;
+    chime();
   }, true);
 
   const soundBtn = $('#sound-toggle');

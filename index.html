@@ -72,18 +72,19 @@
           <div class="car-stage"><div id="car-ring" class="car-ring"></div></div>
           <button id="car-next" class="car-arrow next" type="button" aria-label="Next frame">›</button>
         </div>
-        <p class="car-hint">scroll, swipe or tap a frame to turn the wheel</p>
+        <p class="car-hint">drag, scroll or tap a frame to turn the wheel</p>
+
+        <div class="plain-row">
+          <span class="plain-label">or keep it plain</span>
+          <button type="button" class="plain-opt" data-plain="black" aria-pressed="false"><canvas aria-hidden="true"></canvas><span>Plain Black</span></button>
+          <button type="button" class="plain-opt" data-plain="white" aria-pressed="false"><canvas aria-hidden="true"></canvas><span>Plain White</span></button>
+        </div>
 
         <div id="profile" class="profile" aria-live="polite">
           <div class="profile-main">
             <p class="profile-no" id="profile-no"></p>
             <h3 class="profile-name"><span id="profile-name"></span><small id="profile-tagline"></small></h3>
             <p class="profile-bio" id="profile-bio"></p>
-            <div id="tone-picker" class="tone-picker" hidden>
-              <span>Border</span>
-              <button type="button" data-tone="black">Black</button>
-              <button type="button" data-tone="white">White</button>
-            </div>
           </div>
           <div class="profile-side">
             <div class="meters" id="profile-meters"></div>

@@ -498,35 +498,32 @@ main {
   letter-spacing: .14em;
   color: #5d5c62;
 }
-/* the turning wheel of frames */
+/* the gliding cover-flow wheel of frames (positions are set every frame in JS) */
 .carousel {
   --card-w: 230px;
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
   margin: 0 -10px;
   padding: 10px 0 4px;
   touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
   outline-offset: -4px;
 }
 .car-stage {
   position: relative;
-  width: var(--card-w);
   height: calc(var(--card-w) * 1.25 + 46px);
-  perspective: 1300px;
 }
 .car-ring {
   position: absolute;
   inset: 0;
-  transform-style: preserve-3d;
-  transition: transform .8s cubic-bezier(.3, .7, .2, 1);
+  perspective: 1100px;
 }
 .car-card {
   position: absolute;
-  left: 0; top: 0;
+  left: 50%; top: 0;
   width: var(--card-w);
+  margin-left: calc(var(--card-w) / -2);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -536,26 +533,24 @@ main {
   background: none;
   color: var(--ivory);
   font: inherit;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transition: filter .6s, opacity .6s;
-  filter: brightness(.45) blur(1px);
-  opacity: .8;
+  will-change: transform, opacity;
+  -webkit-tap-highlight-color: transparent;
 }
 .car-card canvas {
   display: block;
   width: 100%;
   height: auto;
+  pointer-events: none;
   box-shadow: 0 18px 36px rgba(0, 0, 0, .7);
+  transition: box-shadow .4s;
 }
-.car-card span { font: 600 11px var(--f-caps); letter-spacing: .18em; text-transform: uppercase; color: var(--mist); }
-.car-card.is-front { filter: none; opacity: 1; }
+.car-card span { font: 600 11px var(--f-caps); letter-spacing: .18em; text-transform: uppercase; color: #fff; opacity: 0; transition: opacity .3s; }
+.car-card.is-front span { opacity: 1; }
 .car-card.is-front canvas { box-shadow: 0 0 0 1px rgba(255, 255, 255, .6), 0 20px 40px rgba(0, 0, 0, .75), 0 0 40px rgba(222, 222, 230, .25); }
-.car-card.is-front span { color: #fff; }
 .car-arrow {
   position: absolute;
   top: 42%;
-  z-index: 2;
+  z-index: 200;
   width: 46px; height: 46px;
   border: 1px solid rgba(255, 255, 255, .5);
   border-radius: 50%;
@@ -567,26 +562,36 @@ main {
 .car-arrow:hover { background: rgba(255, 255, 255, .12); box-shadow: 0 0 18px rgba(222, 222, 230, .4); }
 .car-arrow.prev { left: 12px; }
 .car-arrow.next { right: 12px; }
-.car-hint { margin: 2px 0 18px; text-align: center; font-style: italic; font-weight: 300; font-size: 16px; color: var(--mist); }
+.car-hint { margin: 2px 0 14px; text-align: center; font-style: italic; font-weight: 300; font-size: 16px; color: var(--mist); }
 
-.tone-picker {
+/* Plain Black / Plain White, under the wheel */
+.plain-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px 18px;
+  margin: 0 0 24px;
+}
+.plain-label { font: italic 300 18px var(--f-serif); color: var(--mist); }
+.plain-opt {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 16px;
-}
-.tone-picker span { font: 600 11px var(--f-caps); letter-spacing: .2em; text-transform: uppercase; color: #77767c; margin-right: 4px; }
-.tone-picker button {
-  padding: 6px 16px;
-  border: 1px solid rgba(45, 45, 49, .45);
-  border-radius: 999px;
+  gap: 10px;
+  padding: 6px 16px 6px 6px;
+  border: 1px solid rgba(255, 255, 255, .25);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .03);
+  color: var(--ivory);
   font: 600 11px var(--f-caps);
-  letter-spacing: .14em;
+  letter-spacing: .16em;
   text-transform: uppercase;
+  transition: border-color .2s, box-shadow .2s, background .2s;
 }
-.tone-picker [data-tone="black"] { background: #0a0a0b; color: #f1f0ee; }
-.tone-picker [data-tone="white"] { background: #f7f6f3; color: #1b1a1d; }
-.tone-picker [aria-pressed="true"] { box-shadow: 0 0 0 2px var(--fog), 0 0 0 4px #4a4a50; }
+.plain-opt canvas { display: block; width: 44px; height: auto; border-radius: 2px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .2); }
+.plain-opt:hover { background: rgba(255, 255, 255, .07); }
+.plain-opt[aria-pressed="true"] { border-color: #fff; background: rgba(255, 255, 255, .1); box-shadow: 0 0 18px rgba(222, 222, 230, .35); }
+
 .tone-chips { margin-top: 12px; }
 
 .sound-toggle {
@@ -1082,6 +1087,8 @@ main {
 }
 @media (max-width: 560px) {
   .carousel { --card-w: 150px; }
+  .plain-label { flex-basis: 100%; text-align: center; }
+  .plain-opt { padding-right: 12px; }
   .eyebrow { padding: 0 44px; letter-spacing: .18em; line-height: 1.7; }
   .car-arrow { width: 38px; height: 38px; font-size: 24px; top: 38%; }
   .steps { flex-wrap: wrap; justify-content: center; }
