@@ -5,12 +5,14 @@ A dark gothic lolita photobooth that runs in your browser: think a misty 2000s s
 ## How it works
 
 1. **Title screen**: press START (or hit Enter) for the menu: New Session, How to Play and Credits.
-2. **Select Frame** (`#/themes`): a character-profile screen for each frame, with sweetness & gloom ratings, mood, motifs and a one-tap "pairs with" look (currently *Locked Lattice*). Every print is a 1080×1350 Instagram post (4:5) with four photos, two on top and two on the bottom.
+2. **Select Frame** (`#/themes`): a 3D wheel of frames you turn by scrolling, swiping, the arrows or arrow keys, plus a character-profile card for each frame, with sweetness & gloom ratings, mood, motifs and a one-tap "pairs with" look (*Locked Lattice*, three placeholders waiting for your designs, and *Plain* in black or white). Every print is a 1080×1350 Instagram post (4:5) with four photos, two on top and two on the bottom.
 3. **Shoot** (`#/booth`): through a camera viewfinder with a focus ring, shot counter and live clock. choose a filter (Natural, Digicam, Faded, Monochrome or Pixel), its intensity, and a timer, then strike four poses.
    Tap a thumbnail to retake just that one, or upload photos instead of using the camera.
 4. **Print** (`#/result`): switch frame, filter or intensity, write a caption, add an orange digicam date stamp, add stickers
    (ribbons, hearts, crosses, cherries, teacups, shortcake, bats, red & lilac roses, crowns, candles, coffins, moons…) and drag them around.
    Then download it as a 1080×1350 PNG, sized exactly for an Instagram post.
+
+Every button plays a little music-box chime (toggle it with *♪ sound* in the top bar), and the cursor is a tiny silver key.
 
 Everything stays on your device. No photos are uploaded anywhere.
 
@@ -43,4 +45,5 @@ Repo **Settings → Pages → Deploy from a branch**, then choose your branch an
 - `js/frames.js`: print layout, the frame list and the renderer
 - `js/filters.js`: photo filters (baked into the print)
 - `js/stickers.js`: vector stickers
-- `js/app.js`: router, camera, booth, sticker editing and download
+- `js/app.js`: router, camera, booth, frame wheel, sticker editing and download
+- `js/sound.js`: the music-box chime (synthesised, no audio files)

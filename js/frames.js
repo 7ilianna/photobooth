@@ -40,7 +40,48 @@ window.KB = window.KB || {};
       lace: '#efe9f2', ink: '#efe9f2', sub: '#b7afc0', line: '#c9c3d3',
       slotA: '#26222c', slotB: '#100e13',
     },
+    two: {
+      name: 'Untitled II', tagline: 'a placeholder, waiting for its lace', overlay: 'frames/theme-2.png', placeholder: true,
+      bio: 'An empty frame for now. Save your design as frames/theme-2.png and it takes this place.',
+      sweetness: 3, gloom: 3, mood: 'to be decided', motifs: 'yours to choose',
+      bg: '#24101f', pattern: 'damask', pc: 'rgba(227,169,192,.1)',
+      lace: '#f2d3e0', ink: '#f6dbe8', sub: '#d79ab4', line: '#e3a9c0',
+      slotA: '#45213a', slotB: '#1a0b16',
+    },
+    three: {
+      name: 'Untitled III', tagline: 'a placeholder, waiting for its lace', overlay: 'frames/theme-3.png', placeholder: true,
+      bio: 'An empty frame for now. Save your design as frames/theme-3.png and it takes this place.',
+      sweetness: 3, gloom: 3, mood: 'to be decided', motifs: 'yours to choose',
+      bg: '#f4f0f2', pattern: 'dots', pc: 'rgba(27,20,32,.07)',
+      lace: '#1b1420', ink: '#1b1420', sub: '#6d6178', line: '#1b1420',
+      slotA: '#e4dee6', slotB: '#c9c0cf',
+    },
+    four: {
+      name: 'Untitled IV', tagline: 'a placeholder, waiting for its lace', overlay: 'frames/theme-4.png', placeholder: true,
+      bio: 'An empty frame for now. Save your design as frames/theme-4.png and it takes this place.',
+      sweetness: 3, gloom: 3, mood: 'to be decided', motifs: 'yours to choose',
+      bg: '#15142c', pattern: 'stars', pc: 'rgba(214,214,255,.16)',
+      lace: '#dcd8ff', ink: '#e8e5ff', sub: '#a9a6dc', line: '#b4b8ef',
+      slotA: '#2c2a52', slotB: '#100f22',
+    },
+    // A clean border with no art, in black or white (picked with `tone`)
+    plain: {
+      name: 'Plain', tagline: 'just you, in black or white', plain: true,
+      bio: 'No lace, no keys. A clean border in black or white, so the photos do all the talking.',
+      sweetness: 2, gloom: 2, mood: 'quiet', motifs: 'none at all',
+      look: { filter: 'natural', intensity: 1 },
+      tones: {
+        black: { bg: '#0a0a0b', ink: '#f1f0ee', sub: '#8d8c91', slotA: '#26252a', slotB: '#141416', lace: '#f1f0ee' },
+        white: { bg: '#f7f6f3', ink: '#1b1a1d', sub: '#77767c', slotA: '#e3e1e3', slotB: '#cfcdd0', lace: '#1b1a1d' },
+      },
+    },
   };
+
+  // Resolve a theme for drawing, folding in the chosen tone for Plain.
+  function themeFor(id, tone) {
+    const t = THEMES[id] || Object.values(THEMES)[0];
+    return t.plain ? { ...t, ...t.tones[tone] || t.tones.black } : t;
+  }
 
 
   // Load any overlay PNGs that exist; re-render when one arrives.
@@ -249,23 +290,23 @@ window.KB = window.KB || {};
     c.textAlign = 'center';
     const caption = (o.caption || '').trim() || 'Bisque';
     c.fillStyle = t.ink;
-    let size = 84;
+    let size = 80;
     do {
       c.font = `${size}px "Mea Culpa", "Pinyon Script", cursive`;
       size -= 4;
     } while (c.measureText(caption).width > PRINT.w - 240 && size > 30);
-    c.fillText(caption, cx, y0 + 78);
+    c.fillText(caption, cx, y0 + 74);
     c.fillStyle = t.sub;
     c.font = 'italic 21px "Cormorant Garamond", serif';
     const parts = ['bisque photobooth'];
     if (o.showDate) parts.push(formatDate(o.date || new Date()));
-    c.fillText(parts.join('  ·  '), cx, y0 + 122);
+    c.fillText(parts.join('  ·  '), cx, y0 + 132);
     c.restore();
   }
 
   /* ───────── main renderer ───────── */
   function renderStrip(canvas, o) {
-    const t = THEMES[o.theme] || Object.values(THEMES)[0];
+    const t = themeFor(o.theme, o.tone);
     const s = o.scale || 1;
     const W = PRINT.w, H = PRINT.h;
     canvas.width = Math.round(W * s);
@@ -274,7 +315,7 @@ window.KB = window.KB || {};
     c.setTransform(s, 0, 0, s, 0, 0);
     c.imageSmoothingQuality = 'high';
 
-    if (t.image) { c.fillStyle = t.bg; c.fillRect(0, 0, W, H); }
+    if (t.image || t.plain) { c.fillStyle = t.bg; c.fillRect(0, 0, W, H); }
     else drawPattern(c, t, W, H);
 
     PRINT.slots.forEach((sl, i) => {
@@ -286,7 +327,7 @@ window.KB = window.KB || {};
 
     if (t.image) {
       c.drawImage(t.image, 0, 0, W, H);
-    } else {
+    } else if (!t.plain) {
       PRINT.slots.forEach((sl) => drawSlotFrame(c, sl, t));
       drawLace(c, t, W, H);
       drawGarland(c, W);
@@ -327,6 +368,7 @@ window.KB = window.KB || {};
   KB.PRINT = PRINT;
   KB.PHOTO_ASPECT = PHOTO_ASPECT;
   KB.THEMES = THEMES;
+  KB.themeFor = themeFor;
   KB.loadOverlays = loadOverlays;
   KB.renderStrip = renderStrip;
 })(window.KB);

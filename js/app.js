@@ -1,14 +1,15 @@
 (function () {
-  const { THEMES, PRINT, PHOTO_ASPECT, FILTERS, STICKERS, renderStrip, applyFilter, pixelate, drawSticker, loadOverlays } = window.KB;
+  const { THEMES, PRINT, PHOTO_ASPECT, FILTERS, STICKERS, renderStrip, applyFilter, pixelate, drawSticker, loadOverlays, sound } = window.KB;
 
   const $ = (s, r = document) => r.querySelector(s);
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const COUNT = PRINT.slots.length;
   const SHOT_H = 960, SHOT_W = Math.round(SHOT_H * PHOTO_ASPECT);
-  const ROMAN = ['I', 'II', 'III', 'IV'];
+  const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
 
   const state = {
     theme: Object.keys(THEMES)[0],
+    tone: 'black',      // border colour for the Plain frame
     filter: 'digicam',
     intensity: 1,       // 0–1, shared by every filter
     timer: 3,
@@ -101,17 +102,81 @@
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#dialog').hidden) closeDialog(); });
 
 
-  /* ───────── frame select: a character-profile screen ───────── */
+  /* ───────── frame select: a turning carousel + character profile ───────── */
+  const ids = Object.keys(THEMES);
+  const ring = $('#car-ring');
+  let carPos = Math.max(0, ids.indexOf(state.theme)); // keeps counting past n so it can spin forever
+  const wrap = (n) => ((n % ids.length) + ids.length) % ids.length;
+
+  function buildCarousel() {
+    ring.innerHTML = '';
+    ids.forEach((id, n) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'car-card';
+      b.dataset.n = n;
+      b.setAttribute('aria-label', THEMES[id].name);
+      const cv = document.createElement('canvas');
+      b.append(cv);
+      const label = document.createElement('span');
+      label.textContent = `${ROMAN[n]} · ${THEMES[id].name}`;
+      b.append(label);
+      b.addEventListener('click', () => {
+        const diff = wrap(n - carPos);
+        if (diff) turn(diff > ids.length / 2 ? diff - ids.length : diff, false);
+      });
+      ring.append(b);
+    });
+    paintCarousel();
+  }
+
+  function paintCarousel() {
+    ring.querySelectorAll('.car-card').forEach((b) => {
+      renderStrip(b.querySelector('canvas'), { theme: ids[b.dataset.n], tone: state.tone, scale: 0.26, caption: state.caption, showDate: false });
+    });
+  }
+
+  function layoutCarousel() {
+    const n = ids.length, step = 360 / n;
+    const card = ring.querySelector('.car-card');
+    const w = card ? card.offsetWidth : 220;
+    const radius = Math.round((w / 2) / Math.tan(Math.PI / n) * 1.25);
+    ring.style.transform = `translateZ(${-radius}px) rotateY(${-carPos * step}deg)`;
+    ring.querySelectorAll('.car-card').forEach((b) => {
+      const k = +b.dataset.n;
+      b.style.transform = `rotateY(${k * step}deg) translateZ(${radius}px)`;
+      const front = k === wrap(carPos);
+      b.classList.toggle('is-front', front);
+      b.tabIndex = front ? 0 : -1;
+      b.setAttribute('aria-current', front ? 'true' : 'false');
+    });
+  }
+
+  function turn(d, withSound) {
+    carPos += d;
+    state.theme = ids[wrap(carPos)];
+    if (withSound) sound.chime();
+    layoutCarousel();
+    renderProfile();
+  }
+
   function renderThemes() {
-    const ids = Object.keys(THEMES);
-    const i = Math.max(0, ids.indexOf(state.theme));
-    const t = THEMES[ids[i]];
-    renderStrip($('#profile-canvas'), { theme: ids[i], scale: 0.5, caption: state.caption, showDate: false });
+    carPos = carPos - wrap(carPos) + Math.max(0, ids.indexOf(state.theme));
+    if (ring.children.length !== ids.length) buildCarousel(); else paintCarousel();
+    layoutCarousel();
+    renderProfile();
+  }
+
+  function renderProfile() {
+    const i = ids.indexOf(state.theme);
+    const t = THEMES[state.theme];
     $('#profile-no').textContent = `Frame No.${String(i + 1).padStart(2, '0')} / ${String(ids.length).padStart(2, '0')}`;
     $('#profile-name').textContent = t.name;
     $('#profile-tagline').textContent = t.tagline || '';
     $('#profile-bio').textContent = t.bio || '';
     $('#profile-cv').textContent = t.cv ? `CV: ${t.cv}` : '';
+    $('#tone-picker').hidden = !t.plain;
+    document.querySelectorAll('#tone-picker [data-tone]').forEach((b) => pressed(b, b.dataset.tone === state.tone));
 
     const pips = (n, glyph) => `${glyph.repeat(n)}<i>${glyph.repeat(5 - n)}</i>`;
     $('#profile-meters').innerHTML =
@@ -124,30 +189,49 @@
       ['Size', '1080 × 1350 · Instagram post'],
       t.mood && ['Mood', t.mood],
       t.motifs && ['Motifs', t.motifs],
-      look && ['Pairs with', `${look.name} · ${Math.round(t.look.intensity * 100)}%`],
+      look && ['Pairs with', `${look.name}${t.look.filter === 'natural' ? '' : ` · ${Math.round(t.look.intensity * 100)}%`}`],
     ].filter(Boolean);
     $('#profile-stats').innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
     $('#profile-look').hidden = !look;
-    $('#coming-soon').hidden = ids.length > 1;
-
-    // With more than one frame, show a row of small portraits to switch between
-    const picker = $('#theme-picker');
-    picker.innerHTML = '';
-    picker.hidden = ids.length < 2;
-    if (ids.length < 2) return;
-    ids.forEach((id, n) => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'picker-thumb';
-      b.setAttribute('aria-label', THEMES[id].name);
-      pressed(b, id === state.theme);
-      const cv = document.createElement('canvas');
-      renderStrip(cv, { theme: id, scale: 0.12, showDate: false });
-      b.append(cv);
-      b.addEventListener('click', () => { state.theme = id; renderThemes(); });
-      picker.append(b);
-    });
+    $('#coming-soon').hidden = !Object.values(THEMES).some((x) => x.placeholder && !x.image);
   }
+
+  // Turn the wheel: arrows, mouse wheel / trackpad, swipe, arrow keys
+  $('#car-prev').addEventListener('click', () => turn(-1, false));
+  $('#car-next').addEventListener('click', () => turn(1, false));
+  const carousel = $('#carousel');
+  let wheelLock = 0;
+  carousel.addEventListener('wheel', (e) => {
+    const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (Math.abs(d) < 4) return;
+    e.preventDefault();
+    const now = Date.now();
+    if (now < wheelLock) return;
+    wheelLock = now + 420;
+    turn(d > 0 ? 1 : -1, true);
+  }, { passive: false });
+  let swipeX = null;
+  carousel.addEventListener('pointerdown', (e) => { swipeX = e.clientX; });
+  carousel.addEventListener('pointerup', (e) => {
+    if (swipeX === null) return;
+    const dx = e.clientX - swipeX;
+    swipeX = null;
+    if (Math.abs(dx) > 40) turn(dx < 0 ? 1 : -1, true);
+  });
+  carousel.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); turn(-1, true); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); turn(1, true); }
+  });
+  window.addEventListener('resize', () => { if (current === 'themes') layoutCarousel(); });
+
+  // Plain frame: black or white border
+  function setTone(tone) {
+    state.tone = tone;
+    document.querySelectorAll('[data-tone]').forEach((b) => pressed(b, b.dataset.tone === tone));
+    if (current === 'themes') { paintCarousel(); renderProfile(); }
+    if (current === 'result') drawResult();
+  }
+  document.querySelectorAll('[data-tone]').forEach((b) => b.addEventListener('click', () => setTone(b.dataset.tone)));
 
   $('#profile-look').addEventListener('click', () => {
     const look = THEMES[state.theme].look;
@@ -456,6 +540,7 @@
   function printOptions(selected) {
     return {
       theme: state.theme,
+      tone: state.tone,
       shots: state.filtered,
       stickers: state.stickers,
       selected,
@@ -508,17 +593,24 @@
       b.title = t.name;
       b.setAttribute('aria-label', t.name);
       b.textContent = ROMAN[i];
-      b.style.background = t.bg;
-      b.style.color = t.ink;
+      b.style.background = t.plain ? 'linear-gradient(135deg, #0a0a0b 50%, #f7f6f3 50%)' : t.bg;
+      b.style.color = t.plain ? '#888' : t.ink;
       pressed(b, id === state.theme);
       b.addEventListener('click', () => {
         state.theme = id;
         el.querySelectorAll('.swatch').forEach((x) => pressed(x, x === b));
         syncCaptionControl();
+        syncToneControl();
         drawResult();
       });
       el.append(b);
     });
+    syncToneControl();
+  }
+
+  function syncToneControl() {
+    $('#result-tone').hidden = !THEMES[state.theme].plain;
+    document.querySelectorAll('#result-tone [data-tone]').forEach((b) => pressed(b, b.dataset.tone === state.tone));
   }
 
   let paletteBuilt = false;
@@ -679,6 +771,25 @@
     state.selected = -1;
     location.hash = '#/themes';
   });
+
+  /* ───────── music-box chime on presses ───────── */
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('button, a[href], label.btn, input[type="checkbox"]');
+    if (!el || el.disabled || el.getAttribute('aria-disabled') === 'true' || el.id === 'sound-toggle') return;
+    sound.chime();
+  }, true);
+
+  const soundBtn = $('#sound-toggle');
+  function syncSoundBtn() {
+    soundBtn.textContent = sound.on ? '♪ sound on' : '♪ sound off';
+    pressed(soundBtn, sound.on);
+  }
+  soundBtn.addEventListener('click', () => {
+    sound.set(!sound.on);
+    syncSoundBtn();
+    sound.chime();
+  });
+  syncSoundBtn();
 
   /* ───────── boot ───────── */
   function refresh() {
