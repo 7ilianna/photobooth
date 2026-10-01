@@ -1,8 +1,8 @@
 /* Print layout, the four themes and the strip renderer.
  *
- * Every print is a 1200×1800 (4×6 in at 300dpi) portrait card with four
- * 3:4 photos in a 2×2 grid. To use your own frame art, export a PNG at
- * exactly 1200×1800 with transparent holes over the slots (see
+ * Every print is a 1080×1350 Instagram portrait post (4:5) with four 4:5
+ * photos in a 2×2 grid. To use your own frame art, export a PNG at
+ * exactly 1080×1350 with transparent holes over the slots (see
  * frames/template.png) and set `overlay` on the theme below. Until the
  * file exists, a drawn placeholder is used instead. */
 window.KB = window.KB || {};
@@ -12,8 +12,8 @@ window.KB = window.KB || {};
   const { pearl, drawSticker, heartPath } = KB;
 
   const PRINT = (() => {
-    const w = 1200, h = 1800;
-    const pw = 510, ph = 680, gap = 36, top = 150;
+    const w = 1080, h = 1350;
+    const pw = 440, ph = 550, gap = 20, top = 64;
     const x0 = (w - pw * 2 - gap) / 2;
     const slots = [];
     for (let r = 0; r < 2; r++)
@@ -21,7 +21,7 @@ window.KB = window.KB || {};
         slots.push({ x: x0 + c * (pw + gap), y: top + r * (ph + gap), w: pw, h: ph });
     return { w, h, slots, footerY: top + ph * 2 + gap };
   })();
-  const PHOTO_ASPECT = 3 / 4; // width / height of each photo
+  const PHOTO_ASPECT = 4 / 5; // width / height of each photo
 
   // Placeholder themes: rename them and add your overlay PNGs when ready.
   const THEMES = {
@@ -157,14 +157,10 @@ window.KB = window.KB || {};
   }
 
   function drawGarland(c, W) {
-    const y = 44, x0 = 150, x1 = W - 150, n = 4;
+    const y = 32, x0 = 110, x1 = W - 110, n = 4;
     const seg = (x1 - x0) / n;
-    for (let i = 0; i < n; i++) pearlSwag(c, x0 + seg * i, x0 + seg * (i + 1), y, 16, 4.2);
-    for (let i = 0; i <= n; i++) {
-      const x = x0 + seg * i;
-      pearl(c, x, y, 7);
-      pearl(c, x, y + 15, 4.6);
-    }
+    for (let i = 0; i < n; i++) pearlSwag(c, x0 + seg * i, x0 + seg * (i + 1), y, 6, 3.4);
+    for (let i = 0; i <= n; i++) pearl(c, x0 + seg * i, y, 5.5);
   }
 
   /* ───────── filigree scrollwork (drawn for a top-left corner) ───────── */
@@ -261,17 +257,17 @@ window.KB = window.KB || {};
     c.textAlign = 'center';
     const caption = (o.caption || '').trim() || 'Bisque';
     c.fillStyle = t.ink;
-    let size = 118;
+    let size = 84;
     do {
       c.font = `${size}px "Mea Culpa", "Pinyon Script", cursive`;
       size -= 4;
-    } while (c.measureText(caption).width > PRINT.w - 260 && size > 30);
-    c.fillText(caption, cx, y0 + 128);
+    } while (c.measureText(caption).width > PRINT.w - 240 && size > 30);
+    c.fillText(caption, cx, y0 + 78);
     c.fillStyle = t.sub;
-    c.font = '22px "Shippori Mincho", serif';
+    c.font = '19px "Shippori Mincho", serif';
     const parts = ['人形写真館'];
     if (o.showDate) parts.push(formatDate(o.date || new Date()));
-    c.fillText(parts.join('  ·  '), cx, y0 + 206);
+    c.fillText(parts.join('  ·  '), cx, y0 + 122);
     c.restore();
   }
 
@@ -303,15 +299,15 @@ window.KB = window.KB || {};
       drawLace(c, t, W, H);
       drawGarland(c, W);
       c.save();
-      c.translate(W / 2, 92);
-      drawSticker(c, 'bow', 110, { fill: t.bg, edge: t.lace });
+      c.translate(W / 2, 46);
+      drawSticker(c, 'bow', 74, { fill: t.bg, edge: t.lace });
       c.restore();
       c.save();
       c.fillStyle = t.sub;
       c.globalAlpha = 0.7;
       c.textAlign = 'left';
-      c.font = '600 18px "Cinzel", Georgia, serif';
-      c.fillText(`${t.name.toUpperCase()} · PLACEHOLDER`, 48, 112);
+      c.font = '600 13px "Cinzel", Georgia, serif';
+      c.fillText(`${t.name.toUpperCase()} · PLACEHOLDER`, 44, H - 42);
       c.restore();
     }
 

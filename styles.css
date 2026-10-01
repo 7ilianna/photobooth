@@ -445,7 +445,7 @@ main {
 .booth-main { padding: 40px 30px; }
 .viewfinder {
   position: relative;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 4 / 5;
   width: min(100%, 440px);
   margin: 18px auto 0;
   background: #000;
@@ -560,12 +560,12 @@ main {
 }
 .chip[aria-pressed="true"] small { color: var(--deep); }
 
-.tray-card { padding: 38px 24px 34px; position: sticky; top: 20px; }
+.tray-card { --fil-size: 40px; padding: 38px 24px 34px; position: sticky; top: 20px; }
 .tray-hint { margin: 0 0 16px; text-align: center; font-style: italic; color: var(--mist); font-size: 16px; }
 .tray { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 26px; }
 .thumb {
   position: relative;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 4 / 5;
   max-width: 100%;
   padding: 0;
   border: 0;

@@ -199,8 +199,8 @@
         b.classList.add('has-shot');
         b.setAttribute('aria-label', `Retake photo ${i + 1}`);
         const cv = document.createElement('canvas');
-        cv.width = 180; cv.height = 240;
-        cv.getContext('2d').drawImage(shot, 0, 0, 180, 240);
+        cv.width = 192; cv.height = 240;
+        cv.getContext('2d').drawImage(shot, 0, 0, 192, 240);
         cv.style.filter = css;
         b.append(cv);
         b.addEventListener('click', () => {
@@ -414,7 +414,7 @@
       type,
       x: PRINT.w / 2 + (Math.random() - 0.5) * PRINT.w * 0.4,
       y: PRINT.h * (0.15 + Math.random() * 0.6),
-      size: Math.round(PRINT.w * 0.16),
+      size: Math.round(PRINT.w * 0.15),
       rot: Math.round((Math.random() - 0.5) * 30),
     });
     state.selected = state.stickers.length - 1;
@@ -523,7 +523,7 @@
     renderStrip(out, printOptions(-1));
     const d = new Date();
     const p = (n) => String(n).padStart(2, '0');
-    const name = `bisque-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.png`;
+    const name = `bisque-ig-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.png`;
     out.toBlob((blob) => {
       if (!blob) { toast('couldn’t save the print, sorry!'); return; }
       const url = URL.createObjectURL(blob);
