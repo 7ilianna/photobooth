@@ -41,7 +41,7 @@ window.KB = window.KB || {};
       slotA: '#26222c', slotB: '#100e13',
     },
     lullaby: {
-      name: 'Feathered Lullaby', tagline: 'hush now, little lamb', overlay: 'frames/theme-2.png', footer: false,
+      name: 'Angel Lullaby', tagline: 'hush now, little lamb', overlay: 'frames/theme-2.png', footer: false,
       bio: 'White ruffled curtains tied back with silver ribbon. An angel has left a wing at the sill, a rocking horse waits by the window, and a sleepy lamb keeps watch over a cherub who cried herself to sleep.',
       cv: 'you ♡',
       sweetness: 5, gloom: 2,
