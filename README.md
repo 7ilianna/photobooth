@@ -5,7 +5,7 @@ A dark gothic lolita photobooth that runs in your browser: think a misty 2000s s
 ## How it works
 
 1. **Title screen**: press START (or hit Enter) for the menu: New Session, How to Play and Credits.
-2. **Select Frame** (`#/themes`): a gliding wheel of frames you drag, flick, scroll or turn with the arrows, Plain Black / Plain White underneath it, plus a character-profile card for each frame, with sweetness & gloom ratings, mood, motifs and a one-tap "pairs with" look (*Locked Lattice* and three placeholders waiting for your designs). Every print is a 1080×1350 Instagram post (4:5) with four photos, two on top and two on the bottom.
+2. **Select Frame** (`#/themes`): a gliding wheel of frames you drag, flick, scroll or turn with the arrows, Plain Black / Plain White underneath it, plus a character-profile card for each frame, with sweetness & gloom ratings, mood, motifs and a one-tap "pairs with" look (*Locked Lattice*, *Feathered Lullaby* and *Biscuit Waltz*). Every print is a 1080×1350 Instagram post (4:5) with four photos, two on top and two on the bottom.
 3. **Shoot** (`#/booth`): through a camera viewfinder with a focus ring, shot counter and live clock. choose a filter (Natural, Digicam, Faded, Monochrome or Pixel), its intensity, and a timer, then strike four poses.
    Tap a thumbnail to retake just that one, or upload photos instead of using the camera.
 4. **Print** (`#/result`): switch frame, filter or intensity, write a caption, add an orange digicam date stamp, add stickers

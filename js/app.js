@@ -177,7 +177,8 @@
       const rot = Math.max(-55, Math.min(55, -off * 40));
       const z = -Math.min(a, 2.5) * 160;
       const scale = 1 - Math.min(a, 2) * 0.08;
-      const opacity = Math.max(0, Math.min(1, 1.9 - a));
+      // fade out before a card wraps round the back, however few frames there are
+      const opacity = Math.max(0, Math.min(1, 1.9 - a, (N / 2 - a) * 2.5));
       b.style.transform = `translateX(${x.toFixed(2)}px) translateZ(${z.toFixed(1)}px) rotateY(${rot.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
       b.style.opacity = opacity.toFixed(3);
       b.style.zIndex = String(100 - Math.round(a * 10));

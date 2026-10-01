@@ -1,6 +1,6 @@
 # Theme frames
 
-Frames live in this folder. **Locked Lattice** is `theme-1.png`. *Untitled II–IV* are placeholders that switch to your art as soon as `theme-2.png`, `theme-3.png` or `theme-4.png` exists here.
+Frames live in this folder: **Locked Lattice** (`theme-1.png`), **Feathered Lullaby** (`theme-2.png`) and **Biscuit Waltz** (`theme-3.png`).
 Every print is an **Instagram portrait post: 1080 × 1350 px (4:5)**, with four 4:5 photos in a 2×2 grid.
 
 ## Making a frame
