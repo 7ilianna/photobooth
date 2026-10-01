@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kurobara Photo Booth</title>
+  <meta name="description" content="喫茶 黒薔薇 — a gothic lolita kissaten photo booth. Lace, pearls & coffee jelly.">
+  <meta name="theme-color" content="#1b0a10">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%80%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Kaisei+Decol:wght@400;700&family=Pinyon+Script&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="sparkles" aria-hidden="true">
+    <span>✦</span><span>♡</span><span>✧</span><span>♰</span><span>✦</span><span>♡</span><span>✧</span><span>✦</span>
+  </div>
+
+  <header class="topbar">
+    <a href="#/" class="brand">
+      <span class="brand-jp">喫茶 黒薔薇</span>
+      <span class="brand-en">Kurobara Photo Booth</span>
+    </a>
+    <nav class="steps" aria-label="Steps">
+      <a href="#/menu" data-step="menu"><b>壱</b> menu</a>
+      <a href="#/booth" data-step="booth"><b>弐</b> booth</a>
+      <a href="#/result" data-step="result"><b>参</b> print</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ───────────── HOME ───────────── -->
+    <section id="screen-home" class="screen">
+      <div class="card lace home-card">
+        <div class="open-sign"><span class="lamp"></span>営業中 · OPEN</div>
+        <p class="welcome-jp">いらっしゃいませ</p>
+        <h1 class="title">Kurobara</h1>
+        <p class="title-script">kissa &amp; photo booth</p>
+        <div class="pearl-row" aria-hidden="true"></div>
+
+        <ol class="menu-list">
+          <li><span>Choose your set &amp; tablecloth</span><i></i><span>♡</span></li>
+          <li><span>Strike a pose in the booth</span><i></i><span>✦</span></li>
+          <li><span>Decorate with lace &amp; pearls</span><i></i><span>♰</span></li>
+          <li><span>Take your print home</span><i></i><span>☕︎</span></li>
+        </ol>
+
+        <a class="btn btn-primary btn-big" href="#/menu">Take a seat ✦</a>
+        <p class="fine">est. 1979 · Tokyo · no camera? you can upload photos too</p>
+      </div>
+    </section>
+
+    <!-- ───────────── MENU / FRAME SELECT ───────────── -->
+    <section id="screen-menu" class="screen" hidden>
+      <div class="card lace">
+        <p class="eyebrow">ご注文はお決まりですか？</p>
+        <h2 class="section-title">Today's Menu</h2>
+        <p class="sub">Have you decided on your order, darling?</p>
+        <div class="pearl-row" aria-hidden="true"></div>
+
+        <h3 class="menu-heading"><span>Sets</span><small>セット</small></h3>
+        <div id="layout-list" class="layout-list"></div>
+
+        <h3 class="menu-heading"><span>Tablecloths</span><small>フレーム</small></h3>
+        <div id="frame-grid" class="frame-grid"></div>
+
+        <div class="actions">
+          <a class="btn btn-primary btn-big" href="#/booth">Order &amp; go to the booth ✦</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────── BOOTH ───────────── -->
+    <section id="screen-booth" class="screen" hidden>
+      <div class="booth">
+        <div class="card lace booth-main">
+          <p class="eyebrow">撮影中 · now shooting</p>
+          <div class="viewfinder">
+            <video id="video" playsinline muted autoplay></video>
+            <div id="cam-msg" class="cam-msg">
+              <p>Waking up the camera… ☕︎</p>
+            </div>
+            <div id="countdown" class="countdown" hidden></div>
+            <div id="shot-label" class="shot-label" hidden></div>
+            <div id="flash" class="flash"></div>
+            <span class="corner tl"></span><span class="corner tr"></span>
+            <span class="corner bl"></span><span class="corner br"></span>
+          </div>
+
+          <div class="controls">
+            <div class="control">
+              <span class="control-label">Filter <small>フィルター</small></span>
+              <div id="filter-chips" class="chips"></div>
+            </div>
+            <div class="control">
+              <span class="control-label">Timer <small>タイマー</small></span>
+              <div id="timer-chips" class="chips"></div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="btn-start" class="btn btn-primary btn-big" type="button">Start ♡</button>
+            <label class="btn btn-ghost" for="upload">Upload photos</label>
+            <input id="upload" type="file" accept="image/*" multiple hidden>
+          </div>
+        </div>
+
+        <aside class="card lace tray-card">
+          <p class="eyebrow">伝票 · your order</p>
+          <p id="tray-hint" class="tray-hint"></p>
+          <div id="tray" class="tray"></div>
+          <a id="btn-next" class="btn btn-primary" href="#/result" aria-disabled="true">Decorate ✦</a>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ───────────── RESULT ───────────── -->
+    <section id="screen-result" class="screen" hidden>
+      <div class="result">
+        <div class="result-preview">
+          <canvas id="result-canvas" aria-label="Your photo strip"></canvas>
+          <p class="hint">tap a sticker to select · drag to move</p>
+        </div>
+
+        <div class="card lace result-panel">
+          <p class="eyebrow">できあがり！</p>
+          <h2 class="section-title">Your Print</h2>
+          <div class="pearl-row" aria-hidden="true"></div>
+
+          <div class="control">
+            <span class="control-label">Tablecloth <small>フレーム</small></span>
+            <div id="frame-swatches" class="swatches"></div>
+          </div>
+
+          <div class="control">
+            <span class="control-label">Filter <small>フィルター</small></span>
+            <div id="result-filter-chips" class="chips"></div>
+          </div>
+
+          <div class="control">
+            <label class="control-label" for="caption">Caption <small>ひとこと</small></label>
+            <input id="caption" class="text-input" type="text" maxlength="28" autocomplete="off">
+            <label class="check"><input id="show-date" type="checkbox" checked> print today's date</label>
+          </div>
+
+          <div class="control">
+            <span class="control-label">Stickers <small>シール</small></span>
+            <div id="sticker-palette" class="sticker-palette"></div>
+            <div id="sticker-edit" class="sticker-edit" hidden>
+              <label>size <input id="sticker-size" type="range" min="30" max="320"></label>
+              <label>turn <input id="sticker-rot" type="range" min="-180" max="180"></label>
+              <div class="sticker-edit-btns">
+                <button id="sticker-front" class="btn btn-ghost btn-small" type="button">to front</button>
+                <button id="sticker-del" class="btn btn-ghost btn-small" type="button">remove</button>
+              </div>
+            </div>
+            <button id="sticker-clear" class="link-btn" type="button">clear all stickers</button>
+          </div>
+
+          <div class="actions stack">
+            <button id="btn-download" class="btn btn-primary btn-big" type="button">Download ♡</button>
+            <a class="btn btn-ghost" href="#/booth">Retake</a>
+            <button id="btn-new" class="btn btn-ghost" type="button">New order</button>
+          </div>
+          <p class="fine">またのお越しをお待ちしております<br>we await your next visit ♰</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="floor" aria-hidden="true"></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/stickers.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/frames.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
