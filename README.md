@@ -5,7 +5,7 @@ A dark gothic lolita photobooth that runs in your browser: think a 2000s game ti
 ## How it works
 
 1. **Title screen**: press START (or hit Enter).
-2. **Select Theme** (`#/themes`): pick a frame (currently *Doll's Window*). Every print is a 1080×1350 Instagram post (4:5) with four photos, two on top and two on the bottom.
+2. **Select Theme** (`#/themes`): pick a frame (currently *Locked Lattice*). Every print is a 1080×1350 Instagram post (4:5) with four photos, two on top and two on the bottom.
 3. **Shoot** (`#/booth`): choose a filter (Natural, Digicam, Faded, Monochrome, Lilac, Rosé, Dreamy) and a timer, then strike four poses.
    Tap a thumbnail to retake just that one, or upload photos instead of using the camera.
 4. **Print** (`#/result`): switch theme or filter, write a caption, add an orange digicam date stamp, add stickers

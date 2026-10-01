@@ -29,7 +29,7 @@ window.KB = window.KB || {};
   // doesn't write a caption or date there.
   const THEMES = {
     window: {
-      name: "Doll's Window", jp: '人形の窓', overlay: 'frames/theme-1.png', footer: false,
+      name: 'Locked Lattice', jp: '鍵の格子', overlay: 'frames/theme-1.png', footer: false,
       bg: '#0b0a0d', pattern: 'crosses', pc: 'rgba(239,233,242,.06)',
       lace: '#efe9f2', ink: '#efe9f2', sub: '#b7afc0', line: '#c9c3d3',
       slotA: '#26222c', slotB: '#100e13',
