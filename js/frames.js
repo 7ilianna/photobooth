@@ -30,6 +30,8 @@ window.KB = window.KB || {};
   const THEMES = {
     window: {
       name: 'Locked Lattice', jp: '鍵の格子', overlay: 'frames/theme-1.png', footer: false,
+      bio: 'A wrought-iron window, latched from the inside. A polka-dot ribbon at the sill, a silver key on a length of lace, and two dolls keeping watch from a heart of black organza.',
+      cv: 'you ♡',
       bg: '#0b0a0d', pattern: 'crosses', pc: 'rgba(239,233,242,.06)',
       lace: '#efe9f2', ink: '#efe9f2', sub: '#b7afc0', line: '#c9c3d3',
       slotA: '#26222c', slotB: '#100e13',

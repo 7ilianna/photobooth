@@ -1,11 +1,11 @@
 # Bisque · 人形写真館 🎀
 
-A dark gothic lolita photobooth that runs in your browser: think a 2000s game title screen, but lace, pearls and filigree ♱
+A dark gothic lolita photobooth that runs in your browser: think a misty 2000s survival-horror title screen, but lace, pearls and porcelain dolls ♱
 
 ## How it works
 
 1. **Title screen**: press START (or hit Enter).
-2. **Select Theme** (`#/themes`): pick a frame (currently *Locked Lattice*). Every print is a 1080×1350 Instagram post (4:5) with four photos, two on top and two on the bottom.
+2. **Select Frame** (`#/themes`): a character-profile screen for each frame (currently *Locked Lattice*). Every print is a 1080×1350 Instagram post (4:5) with four photos, two on top and two on the bottom.
 3. **Shoot** (`#/booth`): choose a filter (Natural, Digicam, Faded, Monochrome or Pixel), its intensity, and a timer, then strike four poses.
    Tap a thumbnail to retake just that one, or upload photos instead of using the camera.
 4. **Print** (`#/result`): switch frame, filter or intensity, write a caption, add an orange digicam date stamp, add stickers
@@ -37,7 +37,7 @@ Repo **Settings → Pages → Deploy from a branch**, then choose your branch an
 ## Files
 
 - `index.html`: the four screens
-- `styles.css`: the night sky, glossy script titles, pearls and filigree
+- `styles.css`: drifting fog, chrome script titles, the profile card, pearls and filigree
 - `frames/`: your theme artwork and the design template
 - `js/frames.js`: print layout, the frame list and the renderer
 - `js/filters.js`: photo filters (baked into the print)

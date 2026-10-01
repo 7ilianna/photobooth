@@ -14,6 +14,7 @@
 </head>
 <body data-screen="home">
   <div class="sky" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
   <div class="sparkles" aria-hidden="true">
     <span>✝</span><span>♡</span><span>✧</span><span>✠</span><span>✦</span><span>♱</span><span>✧</span><span>♡</span>
   </div>
@@ -24,7 +25,7 @@
       <span class="brand-jp">〜人形写真館</span>
     </a>
     <nav class="steps" aria-label="Steps">
-      <a href="#/themes" data-step="themes"><b>I</b>theme</a>
+      <a href="#/themes" data-step="themes"><b>I</b>frame</a>
       <a href="#/booth" data-step="booth"><b>II</b>shoot</a>
       <a href="#/result" data-step="result"><b>III</b>print</a>
     </nav>
@@ -39,6 +40,7 @@
         <span class="logo-jp">〜人形写真館</span>
       </h1>
       <div class="pearl-row" aria-hidden="true"></div>
+      <p class="subtitle" lang="ja">人形だって、夢を見るの。<span lang="en">Even dolls dream, you know.</span></p>
       <a class="press-start" href="#/themes">Press START button</a>
       <p class="title-hint">four poses · lace, pearls &amp; ribbons · no camera? upload photos instead</p>
 
@@ -54,11 +56,25 @@
     <!-- ───────────── THEME SELECT ───────────── -->
     <section id="screen-themes" class="screen" hidden>
       <div class="panel">
-        <p class="eyebrow">Chapter I · テーマをえらんでね</p>
-        <h2 class="section-title">Select Theme</h2>
-        <p class="sub">Four poses, two on top and two on the bottom, sized for an Instagram post. More frames coming soon, darling.</p>
+        <p class="eyebrow">Chapter I · フレームをえらんでね</p>
+        <h2 class="section-title">Select Frame</h2>
+        <p class="sub">Four poses, two on top and two on the bottom, sized for an Instagram post.</p>
         <div class="pearl-row" aria-hidden="true"></div>
-        <div id="theme-grid" class="theme-grid"></div>
+        <div id="profile" class="profile">
+          <div class="profile-portrait"><canvas id="profile-canvas" aria-hidden="true"></canvas></div>
+          <div class="profile-info">
+            <p class="profile-no" id="profile-no"></p>
+            <h3 class="profile-name"><span id="profile-name"></span><small id="profile-jp" lang="ja"></small></h3>
+            <p class="profile-bio" id="profile-bio"></p>
+            <dl class="profile-stats">
+              <div><dt>Poses</dt><dd>4 · two by two</dd></div>
+              <div><dt>Size</dt><dd>1080 × 1350 · IG post</dd></div>
+            </dl>
+            <p class="profile-cv" id="profile-cv"></p>
+          </div>
+        </div>
+        <div id="theme-picker" class="theme-picker"></div>
+        <p class="coming-soon" id="coming-soon">more frames coming soon…</p>
         <div class="actions">
           <a class="btn btn-primary btn-big" href="#/booth">To the booth ✝</a>
         </div>

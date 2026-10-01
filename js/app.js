@@ -71,29 +71,35 @@
     }
   });
 
-  /* ───────── theme select ───────── */
+  /* ───────── frame select: a character-profile screen ───────── */
   function renderThemes() {
-    const grid = $('#theme-grid');
-    grid.innerHTML = '';
-    grid.classList.toggle('single', Object.keys(THEMES).length === 1);
-    Object.entries(THEMES).forEach(([id, t], i) => {
+    const ids = Object.keys(THEMES);
+    const i = Math.max(0, ids.indexOf(state.theme));
+    const t = THEMES[ids[i]];
+    renderStrip($('#profile-canvas'), { theme: ids[i], scale: 0.5, caption: state.caption, showDate: false });
+    $('#profile-no').textContent = `Frame No.${String(i + 1).padStart(2, '0')} / ${String(ids.length).padStart(2, '0')}`;
+    $('#profile-name').textContent = t.name;
+    $('#profile-jp').textContent = t.jp;
+    $('#profile-bio').textContent = t.bio || '';
+    $('#profile-cv').textContent = t.cv ? `CV: ${t.cv}` : '';
+    $('#coming-soon').hidden = ids.length > 1;
+
+    // With more than one frame, show a row of small portraits to switch between
+    const picker = $('#theme-picker');
+    picker.innerHTML = '';
+    picker.hidden = ids.length < 2;
+    if (ids.length < 2) return;
+    ids.forEach((id, n) => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'theme-card';
+      b.className = 'picker-thumb';
+      b.setAttribute('aria-label', THEMES[id].name);
       pressed(b, id === state.theme);
       const cv = document.createElement('canvas');
-      renderStrip(cv, { theme: id, scale: 0.3, caption: state.caption, showDate: false });
-      cv.setAttribute('aria-hidden', 'true');
-      const label = document.createElement('span');
-      label.className = 'theme-name';
-      label.innerHTML = `<b>${ROMAN[i]}</b>${t.name}<small>${t.jp}</small>`;
-      b.append(cv, label);
-      b.addEventListener('click', () => {
-        state.theme = id;
-        grid.querySelectorAll('.theme-card').forEach((x) => pressed(x, x === b));
-      });
-      b.addEventListener('dblclick', () => { state.theme = id; location.hash = '#/booth'; });
-      grid.append(b);
+      renderStrip(cv, { theme: id, scale: 0.12, showDate: false });
+      b.append(cv);
+      b.addEventListener('click', () => { state.theme = id; renderThemes(); });
+      picker.append(b);
     });
   }
 
