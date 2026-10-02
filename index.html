@@ -3,23 +3,26 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Bisque Photobooth</title>
-  <meta name="description" content="Bisque — a porcelain-white gothic lolita photobooth. Lace, ribbons, fog and a camera that sees a little more than it should.">
+  <title>Afterimage</title>
+  <meta name="description" content="Afterimage — a pale, foggy gothic lolita photobooth. Keys, ribbons, and a camera that sees a little more than it should.">
   <meta name="theme-color" content="#efeae3">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%80%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Cormorant+SC:wght@400;500;600&family=VT323&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Cormorant+SC:wght@400;500;600&family=Hanken+Grotesk:wght@400;500&family=Pinyon+Script&family=VT323&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-screen="home">
+  <!-- a pale room glimpsed through the fog: window light, a bed frame, all washed out -->
+  <div class="room" aria-hidden="true"><span class="room-window"></span><span class="room-bed"></span></div>
   <div class="sky" aria-hidden="true"></div>
   <div class="bloom" aria-hidden="true"></div>
-  <div class="curtain left" aria-hidden="true"></div>
-  <div class="curtain right" aria-hidden="true"></div>
+  <div class="swashes" aria-hidden="true"></div>
   <div id="floaters" class="floaters" aria-hidden="true"></div>
+  <span class="rabbit" aria-hidden="true"></span>
+  <div class="fog-front" aria-hidden="true"></div>
+  <div class="whiteout" aria-hidden="true"></div>
   <div class="grain" aria-hidden="true"></div>
-  <div class="valance" aria-hidden="true"></div>
 
   <!-- Camera Obscura: viewfinder corners and a filament that glows near anything you can touch -->
   <div class="obscura" aria-hidden="true">
@@ -31,12 +34,12 @@
 
   <header class="topbar">
     <a href="#/" class="brand">
-      <span class="brand-en">Bisque</span>
+      <span class="brand-en">Afterimage</span>
     </a>
     <nav class="steps" aria-label="Steps">
-      <a href="#/themes" data-step="themes"><b>I</b>frame</a>
-      <a href="#/booth" data-step="booth"><b>II</b>shoot</a>
-      <a href="#/result" data-step="result"><b>III</b>print</a>
+      <a href="#/themes" data-step="themes"><b>:1:</b>frame</a>
+      <a href="#/booth" data-step="booth"><b>:2:</b>shoot</a>
+      <a href="#/result" data-step="result"><b>:3:</b>print</a>
       <button id="sound-toggle" class="sound-toggle" type="button" aria-pressed="true">♪ chimes on</button>
       <button id="ambience-toggle" class="sound-toggle" type="button" aria-pressed="true">☾ lullaby on</button>
     </nav>
@@ -46,10 +49,14 @@
     <!-- ───────────── TITLE SCREEN ───────────── -->
     <section id="screen-home" class="screen title-screen">
       <div class="logo-wrap">
-        <img class="doily" src="assets/doily.png" alt="" aria-hidden="true">
+        <span class="title-key" aria-hidden="true"></span>
+        <span class="title-key two" aria-hidden="true"></span>
+        <span class="title-plate" aria-hidden="true"></span>
+        <span class="bracket" aria-hidden="true"></span>
         <h1 class="logo">
-          <span class="logo-word">Bisque</span>
+          <span class="logo-word" data-text="Afterimage">Afterimage</span>
         </h1>
+        <span class="bracket under" aria-hidden="true"></span>
       </div>
       <p class="subtitle">“Even dolls dream, you know.”</p>
 
@@ -62,7 +69,7 @@
       <p class="title-hint">four poses · no camera? upload photos instead</p>
 
       <div class="credits">
-        <p>©2026 BISQUE PHOTO STUDIO</p>
+        <p>©2026 AFTERIMAGE PHOTO STUDIO</p>
         <div class="memcard" aria-label="Memory card in slot 1">
           <span class="memcard-chip" aria-hidden="true"></span>
           <span><b>Memory Card · Slot 1</b>no save data needed</span>
@@ -73,7 +80,7 @@
     <!-- ───────────── THEME SELECT ───────────── -->
     <section id="screen-themes" class="screen" hidden>
       <div class="panel">
-        <p class="eyebrow">Chapter I · Choose your frame</p>
+        <p class="eyebrow">:1: · Choose your frame</p>
         <h2 class="section-title">Select Frame</h2>
         <p class="sub">Four poses, two on top and two on the bottom, sized for an Instagram post.</p>
         <div class="pearl-row" aria-hidden="true"></div>
@@ -88,8 +95,9 @@
             <span class="spine" aria-hidden="true"></span>
             <button id="book-cover" class="book-cover" type="button" aria-label="Open the diary">
               <span class="cover-quilt" aria-hidden="true"></span>
-              <span class="cover-doily" aria-hidden="true"></span>
+              <span class="cover-bracket" aria-hidden="true"></span>
               <span class="cover-title" aria-hidden="true">a diary<em>of dolls</em></span>
+              <span class="cover-bracket under" aria-hidden="true"></span>
               <span class="cover-ribbon" aria-hidden="true"></span>
               <span class="cover-bow" aria-hidden="true"></span>
               <span class="cover-lock" aria-hidden="true"></span>
@@ -140,7 +148,7 @@
     <section id="screen-booth" class="screen" hidden>
       <div class="booth">
         <div class="panel booth-main">
-          <p class="eyebrow">Chapter II · Now shooting</p>
+          <p class="eyebrow">:2: · Now shooting</p>
           <div class="viewfinder">
             <video id="video" playsinline muted autoplay></video>
             <canvas id="pixel-preview" class="pixel-preview" hidden></canvas>
@@ -209,7 +217,7 @@
         </div>
 
         <div class="panel result-panel">
-          <p class="eyebrow">Chapter III · Developed</p>
+          <p class="eyebrow">:3: · Developed</p>
           <h2 class="section-title">Your Print</h2>
           <div class="pearl-row" aria-hidden="true"></div>
 
@@ -264,8 +272,7 @@
     </section>
   </main>
 
-  <p class="footer-line">Bisque · all photos stay on your device</p>
-  <footer class="hem" aria-hidden="true"></footer>
+  <p class="footer-line">Afterimage · all photos stay on your device</p>
 
   <div id="dialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" hidden>
     <div class="panel dialog-box">
@@ -287,8 +294,8 @@
   <template id="tpl-credits">
     <dl class="credit-roll">
       <div><dt>Frame art</dt><dd>you ♡</dd></div>
-      <div><dt>Lettering</dt><dd>Cormorant Garamond · Cormorant SC</dd></div>
-      <div><dt>Fog, lace &amp; ribbons</dt><dd>hand-stitched in CSS</dd></div>
+      <div><dt>Lettering</dt><dd>Pinyon Script · Cormorant Garamond · Hanken Grotesk</dd></div>
+      <div><dt>Fog, keys &amp; flourishes</dt><dd>drawn by hand in code</dd></div>
       <div><dt>Lullaby</dt><dd>a music box, played by the browser</dd></div>
       <div><dt>Your photos</dt><dd>never leave your device</dd></div>
     </dl>

@@ -156,6 +156,32 @@ def filigree(tf, color='#a39ba1'):
             f"stroke-width='2.4' stroke-linecap='round'><g fill='{color}'>{c}</g>{g}</g></svg>")
 
 
+def ornament_files():
+    """Larger drawings, saved as their own SVG files under assets/ornaments/."""
+    import flourish as fl
+    corner = fl.corner('#8d8a93')
+    inner = corner[corner.index('>') + 1:corner.rindex('</svg>')]
+
+    def turned(tf):
+        return f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><g transform='{tf}'>{inner}</g></svg>"
+    return {
+        'FL_TL': ('corner-tl.svg', corner),
+        'FL_TR': ('corner-tr.svg', turned('translate(200 0) scale(-1 1)')),
+        'FL_BL': ('corner-bl.svg', turned('translate(0 200) scale(1 -1)')),
+        'FL_BR': ('corner-br.svg', turned('translate(200 200) scale(-1 -1)')),
+        'FL_DIVIDER': ('divider.svg', fl.divider('#8d8a93')),
+        'SWASHES': ('swashes.svg', fl.swashes('#2a292d')),
+        'BRACKET': ('bracket.svg', fl.bracket('#2a292d')),
+        'BRACKET_UNDER': ('bracket-under.svg', fl.bracket('#2a292d', flip=True)),
+        'BRACKET_SOFT': ('bracket-soft.svg', fl.bracket('#6d6a72')),
+        'BRACKET_SOFT_UNDER': ('bracket-soft-under.svg', fl.bracket('#6d6a72', flip=True)),
+        'KEY': ('key.svg', fl.key('#262529')),
+        'PLATE': ('keyhole-plate.svg', fl.escutcheon('#262529')),
+        'RABBIT': ('rabbit.svg', fl.rabbit('#141316')),
+        'PETAL': ('petal.svg', fl.petal()),
+    }
+
+
 def tokens():
     return {
         'LACE_HEM': uri(hem()),

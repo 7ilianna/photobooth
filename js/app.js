@@ -19,7 +19,7 @@
     filteredKey: '',
     stickers: [],
     selected: -1,
-    caption: 'Bisque',
+    caption: 'Afterimage',
     showDate: true,
     stamp: false,
   };
@@ -348,7 +348,7 @@
   (function spawnFloaters() {
     if (reduceMotion) return;
     const host = $('#floaters');
-    const kinds = ['bow', 'curl', 'lace', 'rosette', 'bow', 'lace', 'curl', 'rosette', 'bow'];
+    const kinds = ['bow', 'curl', 'bow', 'curl', 'petal', 'bow', 'curl', 'petal'];
     const count = window.innerWidth < 600 ? 9 : 18;
     for (let i = 0; i < count; i++) {
       const s = document.createElement('span');
@@ -914,7 +914,7 @@
     renderStrip(out, printOptions(-1));
     const d = new Date();
     const p = (n) => String(n).padStart(2, '0');
-    const name = `bisque-ig-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.png`;
+    const name = `afterimage-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.png`;
     out.toBlob((blob) => {
       if (!blob) { toast('couldn’t save the print, sorry!'); return; }
       const url = URL.createObjectURL(blob);
@@ -982,9 +982,10 @@
   if (document.fonts && document.fonts.load) {
     Promise.all([
       'italic 300 80px "Cormorant Garamond"',
+      '80px "Pinyon Script"',
       '500 18px "Cormorant SC"',
       'italic 22px "Cormorant Garamond"',
       '30px "VT323"',
-    ].map((f) => document.fonts.load(f, 'Bisque I II III IV 0123456789'))).then(refresh).catch(() => {});
+    ].map((f) => document.fonts.load(f, 'Afterimage I II III IV 0123456789'))).then(refresh).catch(() => {});
   }
 })();

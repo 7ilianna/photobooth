@@ -1,36 +1,37 @@
-/* ═══════════════ Bisque — the doll photo studio ═══════════════
- * Porcelain & bone: a white, pretty-and-eerie take on a haunted camera.
- * Lace everywhere (hems, curtains, panel trims, buttons), drifting fog and a
- * bright bloom, ribbons and lace scraps floating past, and the Camera
- * Obscura's corners and filament watching from the edges of the screen.
+/* ═══════════════ Afterimage ═══════════════
+ * A pale, ghastly photobooth: a washed-out sanatorium room lost in fog,
+ * overexposed white edges, engraved vine flourishes and worn-ink scroll
+ * brackets, skeleton keys and a keyhole plate, ribbons drifting past and a
+ * shadowy rabbit that sometimes runs through the mist. The Camera Obscura's
+ * corners and filament watch from the edges of the screen.
  * Layout: title screen → diary (frame select) → booth → print. */
 
 :root {
   color-scheme: light;
 
-  --bone: #efeae3;        /* page */
-  --porcelain: #f9f7f3;   /* panels */
-  --paper: #fbf8f2;       /* diary pages */
-  --linen: #e3dcd2;       /* soft fills */
-  --ink: #2f2d31;         /* text */
-  --ink-2: #57545a;       /* secondary text */
-  --ink-3: #8b868c;       /* muted text, hairlines */
-  --silver: #b8b2b7;
-  --shadow: rgba(80, 66, 56, .16);
+  --bone: #e4e4e3;        /* page: cold, washed-out grey-white */
+  --porcelain: #f4f4f3;   /* panels */
+  --paper: #f6f5f2;       /* diary pages */
+  --linen: #d9d8d8;       /* soft fills */
+  --ink: #232226;         /* text */
+  --ink-2: #4f4e54;       /* secondary text */
+  --ink-3: #85848b;       /* muted text, hairlines */
+  --silver: #b4b3b8;
+  --shadow: rgba(60, 62, 72, .16);
   --glow: rgba(255, 255, 255, .9);
 
   --f-serif: "Cormorant Garamond", "Cormorant", Georgia, serif;
   --f-caps: "Cormorant SC", "Cormorant Garamond", Georgia, serif;
+  --f-script: "Pinyon Script", "Cormorant Garamond", cursive;
+  --f-sans: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
 
-  --lace-hem: @@LACE_HEM@@;
-  --lace-net: @@LACE_NET@@;
-  --lace-frame: @@LACE_FRAME@@;
   --bow: @@BOW@@;
   --bow-dark: @@BOW_DARK@@;
-  --fil-tl: @@FIL_TL@@;
-  --fil-tr: @@FIL_TR@@;
-  --fil-bl: @@FIL_BL@@;
-  --fil-br: @@FIL_BR@@;
+  --fil-tl: @@FL_TL@@;
+  --fil-tr: @@FL_TR@@;
+  --fil-bl: @@FL_BL@@;
+  --fil-br: @@FL_BR@@;
+  --divider: @@FL_DIVIDER@@;
 @@CURSORS@@
 }
 
@@ -44,7 +45,7 @@ body {
   display: flex;
   flex-direction: column;
   color: var(--ink);
-  background: var(--bone) @@DAMASK@@ center top / 120px 120px;
+  background: var(--bone);
   font: 400 19px/1.55 var(--f-serif);
   overflow-x: hidden;
   cursor: var(--cursor-key);
@@ -60,8 +61,6 @@ a { color: inherit; }
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  background:
-    radial-gradient(140% 100% at 50% 45%, transparent 55%, rgba(120, 104, 92, .22) 100%);
 }
 .sky::before, .sky::after {
   /* slow banks of white mist, drifting in opposite directions */
@@ -69,8 +68,8 @@ a { color: inherit; }
   position: absolute;
   left: -50%;
   width: 200%;
-  height: 65%;
-  filter: blur(40px);
+  height: 75%;
+  filter: blur(46px);
   background:
     radial-gradient(18% 40% at 10% 60%, rgba(255, 255, 255, .95), transparent 70%),
     radial-gradient(22% 45% at 32% 40%, rgba(255, 255, 255, .8), transparent 70%),
@@ -79,72 +78,109 @@ a { color: inherit; }
     radial-gradient(18% 40% at 95% 60%, rgba(255, 255, 255, .9), transparent 70%),
     radial-gradient(30% 30% at 40% 80%, rgba(170, 158, 148, .12), transparent 70%);
 }
-.sky::before { bottom: -14%; opacity: .9; animation: mist 70s linear infinite; }
-.sky::after { top: -20%; opacity: .6; animation: mist 95s linear infinite reverse; }
+.sky::before { bottom: -18%; opacity: 1; animation: mist 60s linear infinite; }
+.sky::after { top: -24%; opacity: .85; animation: mist 85s linear infinite reverse; }
 @keyframes mist { from { transform: translateX(0); } to { transform: translateX(25%); } }
 .bloom {
-  /* an overexposed glow, like light pouring through a window */
+  /* overexposed light pouring in, breathing slowly */
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(60% 45% at 50% 18%, rgba(255, 255, 255, .85), transparent 70%);
+  background:
+    radial-gradient(55% 45% at 30% 22%, rgba(255, 255, 255, .95), transparent 70%),
+    radial-gradient(40% 35% at 75% 30%, rgba(255, 255, 255, .6), transparent 70%);
   animation: breathe 9s ease-in-out infinite alternate;
 }
 @keyframes breathe { to { opacity: .65; } }
+/* the ghost of a sanatorium room behind the fog: window light and an iron bed */
+.room {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(14px);
+  opacity: .65;
+}
+.room-window {
+  position: absolute;
+  left: 8%; top: 6%;
+  width: 34vw; height: 56vh;
+  background:
+    linear-gradient(90deg, transparent 47%, rgba(150, 152, 162, .5) 47% 53%, transparent 53%),
+    linear-gradient(transparent 47%, rgba(150, 152, 162, .5) 47% 53%, transparent 53%),
+    #fff;
+  box-shadow: 0 0 0 2.4vw rgba(170, 172, 182, .45), 0 0 120px 60px rgba(255, 255, 255, .9);
+  transform: perspective(900px) rotateY(18deg);
+}
+.room-bed {
+  position: absolute;
+  right: 6%; bottom: 10%;
+  width: 40vw; height: 26vh;
+  border-top: 1.2vw solid rgba(120, 122, 132, .35);
+  background:
+    repeating-linear-gradient(90deg, rgba(120, 122, 132, .3) 0 .6vw, transparent .6vw 4vw) 0 0 / 100% 60% no-repeat,
+    linear-gradient(transparent 60%, rgba(255, 255, 255, .8) 60%);
+}
+/* a second, closer veil of mist that drifts in front of everything */
+.fog-front {
+  position: fixed;
+  left: -50%;
+  bottom: -10%;
+  z-index: 7;
+  width: 200%;
+  height: 60%;
+  pointer-events: none;
+  filter: blur(50px);
+  opacity: .8;
+  background:
+    radial-gradient(14% 40% at 12% 70%, rgba(255, 255, 255, .9), transparent 70%),
+    radial-gradient(18% 45% at 38% 80%, rgba(255, 255, 255, .7), transparent 70%),
+    radial-gradient(14% 40% at 66% 75%, rgba(255, 255, 255, .85), transparent 70%),
+    radial-gradient(18% 45% at 90% 80%, rgba(255, 255, 255, .7), transparent 70%);
+  animation: mist 48s linear infinite;
+}
+/* a milky veil over everything that slowly thickens and thins */
+.whiteout::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(240, 240, 241, .22);
+  animation: breathe 13s ease-in-out infinite alternate-reverse;
+}
+/* blown-out white at the edges of the screen, like an overexposed photograph */
+.whiteout {
+  position: fixed;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  background: radial-gradient(120% 95% at 50% 50%, transparent 58%, rgba(255, 255, 255, .55) 80%, rgba(255, 255, 255, .95) 100%);
+}
 .grain {
   position: fixed;
   inset: 0;
-  z-index: 6;
+  z-index: 8;
   pointer-events: none;
-  opacity: .05;
+  opacity: .09;
   mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* sheer lace curtains at both edges, swaying as if a window is open */
-.curtain {
-  position: fixed;
-  top: -2vh;
-  bottom: -2vh;
-  z-index: 0;
-  width: clamp(34px, 10vw, 150px);
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, .55) 0 10px, rgba(255, 255, 255, 0) 10px 26px, rgba(150, 138, 128, .06) 26px 30px, rgba(255, 255, 255, 0) 30px 42px),
-    var(--lace-net) 0 0 / 36px 36px;
-  transform-origin: top center;
-  animation: sway 11s ease-in-out infinite alternate;
-}
-.curtain.left {
-  left: 0;
-  -webkit-mask-image: linear-gradient(90deg, #000 55%, transparent);
-  mask-image: linear-gradient(90deg, #000 55%, transparent);
-}
-.curtain.right {
-  right: 0;
-  -webkit-mask-image: linear-gradient(270deg, #000 55%, transparent);
-  mask-image: linear-gradient(270deg, #000 55%, transparent);
-  animation-delay: -5s;
-}
-@keyframes sway {
-  0% { transform: skewX(0deg) scaleX(1); }
-  50% { transform: skewX(1.6deg) scaleX(1.06); }
-  100% { transform: skewX(-1.2deg) scaleX(.97); }
-}
 
-/* a lace valance across the very top of the page */
-.valance {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 4;
-  height: 46px;
-  pointer-events: none;
-  background: var(--lace-hem) 0 0 / 48px 46px repeat-x;
-  filter: drop-shadow(0 3px 4px var(--shadow));
-}
 
-/* ───────── floating ribbons and lace scraps ───────── */
+/* ───────── title-screen swashes (the Keys poster) ───────── */
+.swashes {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: @@SWASHES@@ center / cover no-repeat;
+  opacity: 0;
+  transition: opacity 1.2s;
+}
+body[data-screen="home"] .swashes { opacity: .8; }
+
+/* ───────── floating ribbons and petals ───────── */
 .floaters { position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
 .floater {
   position: absolute;
@@ -159,8 +195,33 @@ a { color: inherit; }
 }
 .f-bow { background-image: var(--bow); }
 .f-curl { background-image: @@CURL@@; }
-.f-lace { background-image: @@SCRAP@@; }
-.f-rosette { background-image: @@ROSETTE@@; }
+.f-petal { background-image: @@PETAL@@; }
+
+/* a shadowy rabbit that sometimes runs through the mist */
+.rabbit {
+  position: fixed;
+  left: 0; bottom: 14vh;
+  z-index: 6;
+  width: 110px;
+  aspect-ratio: 3 / 2;
+  pointer-events: none;
+  background: @@RABBIT@@ center / contain no-repeat;
+  filter: blur(3px);
+  opacity: 0;
+  animation: hop 34s linear infinite 6s;
+}
+@keyframes hop {
+  0%, 62% { transform: translate(-20vw, 0); opacity: 0; }
+  64% { opacity: .55; }
+  66% { transform: translate(10vw, -30px); }
+  68% { transform: translate(24vw, 0); }
+  70% { transform: translate(38vw, -34px); }
+  72% { transform: translate(52vw, 0); }
+  74% { transform: translate(66vw, -30px); }
+  76% { transform: translate(80vw, 0); opacity: .5; }
+  78% { transform: translate(94vw, -28px); }
+  80%, 100% { transform: translate(115vw, 0); opacity: 0; }
+}
 @keyframes drift {
   0%   { transform: translate(0, -12vh) rotate(0deg); }
   25%  { transform: translate(var(--sway), 22vh) rotate(calc(var(--spin) * 90deg)); }
@@ -212,12 +273,11 @@ body.is-sensing .ob-filament i, .viewfinder.is-charging .hud-filament i {
   justify-content: space-between;
   gap: 10px 20px;
   flex-wrap: wrap;
-  padding: 50px 64px 14px;
+  padding: 30px 64px 14px;
 }
 .brand { text-decoration: none; }
 .brand-en {
-  font: italic 300 40px/1 var(--f-serif);
-  letter-spacing: .02em;
+  font: 400 44px/1 var(--f-script);
   color: var(--ink);
   text-shadow: 0 1px 0 #fff, 0 6px 18px var(--shadow);
 }
@@ -225,14 +285,14 @@ body[data-screen="home"] .brand { visibility: hidden; }
 .steps { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .steps a {
   text-decoration: none;
-  font: 500 15px var(--f-caps);
-  letter-spacing: .18em;
+  font: 400 14px var(--f-sans);
+  letter-spacing: .04em;
   padding: 6px 14px;
   border-radius: 999px;
   border: 1px solid transparent;
   color: var(--ink-3);
 }
-.steps a b { font-weight: 600; margin-right: 6px; color: var(--ink-2); }
+.steps a b { font-weight: 500; margin-right: 6px; color: var(--ink-2); }
 .steps a:hover { color: var(--ink); }
 .steps a.active {
   color: var(--ink);
@@ -247,8 +307,8 @@ body[data-screen="home"] .brand { visibility: hidden; }
   border-radius: 999px;
   background: rgba(255, 255, 255, .5);
   color: var(--ink-3);
-  font: 500 13px var(--f-caps);
-  letter-spacing: .14em;
+  font: 400 12px var(--f-sans);
+  letter-spacing: .04em;
 }
 .sound-toggle[aria-pressed="true"] { color: var(--ink); border-style: solid; background: #fff; }
 
@@ -267,52 +327,42 @@ main {
 
 /* ───────── panels: porcelain paper trimmed in lace ───────── */
 .panel {
-  --fil-size: 74px;
+  --fil-size: 120px;
   position: relative;
-  padding: 40px 30px;
-  border: 24px solid transparent;
-  border-image: var(--lace-frame) 24 round;
+  padding: 50px 34px;
+  border: 1px solid rgba(35, 34, 38, .28);
+  outline: 1px solid rgba(35, 34, 38, .14);
+  outline-offset: -8px;
   background:
-    var(--fil-tl) top 12px left 12px / var(--fil-size) no-repeat,
-    var(--fil-tr) top 12px right 12px / var(--fil-size) no-repeat,
-    var(--fil-bl) bottom 12px left 12px / var(--fil-size) no-repeat,
-    var(--fil-br) bottom 12px right 12px / var(--fil-size) no-repeat,
-    radial-gradient(120% 80% at 50% 0, #fff, var(--porcelain) 60%, #f1ece5);
-  background-clip: padding-box;
-  filter: drop-shadow(0 0 1px rgba(120, 108, 96, .35)) drop-shadow(0 18px 30px var(--shadow));
+    var(--fil-tl) top 14px left 14px / var(--fil-size) no-repeat,
+    var(--fil-tr) top 14px right 14px / var(--fil-size) no-repeat,
+    var(--fil-bl) bottom 14px left 14px / var(--fil-size) no-repeat,
+    var(--fil-br) bottom 14px right 14px / var(--fil-size) no-repeat,
+    radial-gradient(120% 80% at 50% 0, rgba(255, 255, 255, .92), rgba(244, 244, 243, .86) 60%, rgba(234, 234, 233, .88));
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 60px 20px rgba(255, 255, 255, .45), 0 24px 40px var(--shadow);
 }
 
 .pearl-row {
-  /* a ribbon-and-bow divider */
-  position: relative;
-  height: 14px;
-  width: min(320px, 80%);
-  margin: 16px auto 28px;
-  background:
-    linear-gradient(transparent 6px, rgba(47, 45, 49, .28) 6px 7px, transparent 7px),
-    radial-gradient(circle, rgba(47, 45, 49, .35) 1.2px, transparent 1.6px) 0 0 / 12px 14px repeat-x;
-}
-.pearl-row::after {
-  content: "";
-  position: absolute;
-  left: 50%; top: 50%;
-  width: 46px; height: 34px;
-  transform: translate(-50%, -50%);
-  background: var(--porcelain) var(--bow-dark) center / 40px no-repeat;
+  /* a vine flourish divider */
+  height: 48px;
+  width: min(380px, 90%);
+  margin: 6px auto 22px;
+  background: var(--divider) center / contain no-repeat;
 }
 
 .eyebrow {
   margin: 0 0 4px;
   text-align: center;
-  font: 500 15px var(--f-caps);
-  letter-spacing: .3em;
+  font: 400 14px var(--f-sans);
+  letter-spacing: .06em;
   color: var(--ink-3);
 }
 .section-title {
   margin: 0;
   text-align: center;
-  font: italic 300 clamp(48px, 7vw, 76px)/1.1 var(--f-serif);
-  letter-spacing: .01em;
+  font: 400 clamp(58px, 8vw, 92px)/1.15 var(--f-script);
   color: var(--ink);
   text-shadow: 0 1px 0 #fff, 0 8px 22px var(--shadow);
   text-wrap: balance;
@@ -390,34 +440,64 @@ main {
   text-align: center;
   gap: 8px;
 }
-.logo-wrap { display: grid; place-items: center; padding: 10px 0; }
-.doily {
-  /* the real lace doily, turning slowly behind the whole title screen */
-  position: fixed;
-  left: 50%; top: 47%;
-  z-index: -1;
-  width: min(860px, 125vw);
-  height: auto;
-  max-width: none;
-  transform: translate(-50%, -50%);
-  opacity: .95;
-  filter: drop-shadow(0 2px 2px rgba(110, 98, 88, .25)) drop-shadow(0 18px 40px var(--shadow));
-  pointer-events: none;
-  animation: turn 240s linear infinite;
+.logo-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 10px 0;
 }
-@keyframes turn { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.bracket {
+  display: block;
+  width: min(560px, 82vw);
+  aspect-ratio: 5 / 1;
+  background: @@BRACKET@@ center / contain no-repeat;
+  opacity: .85;
+}
+.bracket.under { background-image: @@BRACKET_UNDER@@; margin-top: -10px; }
+.title-key, .title-plate {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  background: center / contain no-repeat;
+  opacity: .72;
+  filter: drop-shadow(0 10px 18px var(--shadow));
+}
+.title-key { left: -18%; top: -18%; width: 110px; aspect-ratio: 120 / 284; background-image: @@KEY@@; rotate: -24deg; animation: bob 9s ease-in-out infinite; }
+.title-key.two { left: -9%; top: 6%; rotate: 32deg; animation-delay: -4s; opacity: .55; }
+.title-plate { right: -14%; top: 2%; width: 150px; aspect-ratio: 200 / 236; background-image: @@PLATE@@; animation: bob 11s ease-in-out infinite -2s; }
+@keyframes bob { 50% { translate: 0 -10px; } }
 .logo { margin: 0; font-weight: 400; line-height: 1; }
 .logo-word {
+  position: relative;
   display: block;
-  padding: 0 .1em;
-  font: italic 300 clamp(110px, 22vw, 230px)/1 var(--f-serif);
-  letter-spacing: .01em;
+  padding: 0 .12em;
+  font: 400 clamp(60px, 16vw, 196px)/1.1 var(--f-script);
   color: var(--ink);
-  text-shadow: 0 2px 0 #fff, 0 -1px 0 rgba(0, 0, 0, .06), 0 16px 40px rgba(80, 66, 56, .22), 0 0 60px #fff;
+  text-shadow: 0 1px 0 #fff, 0 16px 40px rgba(60, 62, 72, .22);
+}
+.logo-word::after {
+  /* the afterimage: a pale ghost of the title that drifts and flickers */
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  padding: 0 .12em;
+  color: rgba(60, 62, 72, .32);
+  filter: blur(2.5px);
+  transform: translate(10px, 6px);
+  animation: ghost 7s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes ghost {
+  0%, 100% { transform: translate(10px, 6px); opacity: .7; }
+  40% { transform: translate(-6px, 10px); opacity: .35; }
+  42% { opacity: .9; }
+  44% { opacity: .3; }
+  70% { transform: translate(14px, -4px); opacity: .6; }
 }
 .subtitle {
-  margin: 4px 0 0;
-  font: italic 400 24px var(--f-serif);
+  margin: 10px 0 0;
+  font: 400 17px var(--f-sans);
+  word-spacing: .5em;
   color: var(--ink-2);
   text-shadow: 0 0 12px #fff, 0 0 24px #fff;
 }
@@ -526,19 +606,8 @@ main {
   pointer-events: none;
   transition: opacity .6s;
 }
-.book::after {
-  /* the lace edge of the binding, peeking out under the pages */
-  content: "";
-  position: absolute;
-  left: -14px; right: -14px; bottom: -22px;
-  height: 30px;
-  background: var(--lace-hem) 0 0 / 48px 46px repeat-x;
-  transform: scaleY(-1);
-  filter: drop-shadow(0 -2px 3px var(--shadow));
-  z-index: -1;
-}
 
-/* the cover: quilted white satin, lace, a doily and a silver ribbon */
+/* the cover: quilted white satin, scroll brackets, a keyhole plate and a silver ribbon */
 .book-cover {
   position: absolute;
   top: 0;
@@ -546,8 +615,9 @@ main {
   width: var(--page-w);
   height: var(--page-h);
   padding: 0;
-  border: 16px solid transparent;
-  border-image: var(--lace-frame) 24 round;
+  border: 1px solid rgba(35, 34, 38, .3);
+  outline: 1px solid rgba(35, 34, 38, .15);
+  outline-offset: -9px;
   border-radius: 4px 10px 10px 4px;
   background:
     @@QUILT@@ 0 0 / 34px 34px,
@@ -562,27 +632,25 @@ main {
 .book-cover:hover { transform: rotateY(-8deg); }
 .diary[data-state="opening"] .book-cover { transform: rotateY(-178deg); opacity: 0; }
 .diary[data-state="open"] .book-cover { display: none; }
-.cover-doily {
+.cover-bracket {
   position: absolute;
-  left: 50%; top: 42%;
-  width: 86%;
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  background: url("assets/doily.png") center / contain no-repeat;
-  filter: drop-shadow(0 2px 3px rgba(110, 98, 88, .3));
+  left: 10%; right: 10%; top: 24%;
+  aspect-ratio: 5 / 1;
+  background: @@BRACKET_SOFT@@ center / contain no-repeat;
 }
+.cover-bracket.under { top: 56%; background-image: @@BRACKET_SOFT_UNDER@@; }
 .cover-title {
   position: absolute;
   left: 0; right: 0; top: 42%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  font: 500 22px var(--f-caps);
+  font: 400 15px var(--f-sans);
   letter-spacing: .3em;
   color: var(--ink-2);
   text-shadow: 0 0 6px #fff, 0 0 14px #fff;
 }
-.cover-title em { font: italic 300 54px/1 var(--f-serif); letter-spacing: .02em; color: var(--ink); }
+.cover-title em { font: 400 64px/1.1 var(--f-script); letter-spacing: 0; font-style: normal; color: var(--ink); }
 .cover-ribbon {
   position: absolute;
   top: 0; bottom: 0; right: 16%;
@@ -599,10 +667,12 @@ main {
 }
 .cover-lock {
   position: absolute;
-  left: -6px; top: 50%;
-  width: 34px; height: 42px;
+  left: -12px; top: 50%;
+  width: 50px;
+  aspect-ratio: 200 / 236;
   transform: translateY(-50%);
-  background: @@LOCK@@ center / contain no-repeat;
+  background: @@PLATE@@ center / contain no-repeat;
+  filter: drop-shadow(0 3px 4px var(--shadow));
 }
 .cover-hint {
   position: absolute;
@@ -1129,14 +1199,6 @@ main {
   letter-spacing: .24em;
   color: var(--ink-3);
 }
-.hem {
-  position: relative;
-  z-index: 3;
-  height: 46px;
-  background: var(--lace-hem) 0 0 / 48px 46px repeat-x;
-  transform: scaleY(-1);
-  filter: drop-shadow(0 3px 4px var(--shadow));
-}
 .toast {
   position: fixed;
   left: 50%;
@@ -1194,7 +1256,11 @@ main {
   .steps { justify-content: center; }
   .steps a { padding: 4px 9px; font-size: 13px; letter-spacing: .12em; }
   .sound-toggle { font-size: 11px; padding: 4px 9px; }
-  .panel { --fil-size: 46px; padding: 30px 12px; border-width: 18px; }
+  .panel { --fil-size: 70px; padding: 40px 14px; }
+  .title-key, .title-plate { display: none; }
+  body[data-screen="home"] .swashes { opacity: .35; }
+  .bracket { width: 78vw; }
+  .room-window { width: 60vw; height: 40vh; }
   .booth-main { padding: 30px 10px; }
   .btn-big { padding: 14px 28px; font-size: 17px; }
   .eyebrow { padding: 0 30px; letter-spacing: .16em; line-height: 1.7; }
@@ -1211,7 +1277,7 @@ main {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sky::before, .sky::after, .bloom, .curtain, .doily, .press-start, .loading span, .countdown.pop, .flash.go,
+  .sky::before, .sky::after, .bloom, .fog-front, .rabbit, .logo-word::after, .title-key, .title-plate, .press-start, .loading span, .countdown.pop, .flash.go,
   .title-menu > *, .screen, .dialog, .cover-hint, .is-chosen .stamp, .photo.is-flash .photo-flash, body.is-sensing .ob-filament i { animation: none; }
   .floaters { display: none; }
   * { transition: none !important; }
