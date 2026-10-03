@@ -67,7 +67,20 @@ window.KB = window.KB || {};
       lace: '#ffffff', ink: '#5a3d31', sub: '#9c8378', line: '#d9c6c2',
       slotA: '#f2e8e6', slotB: '#dccbc6',
     },
-    // A clean border with no art, in black or white (picked with `tone`)
+    sky: {
+      name: 'Cloud Nine Recital', tagline: 'a love note sent from above', overlay: 'frames/theme-4.png', footer: false,
+      fortune: 'Someone up there is humming your name. Answer them with a smile ♡',
+      bio: 'A stairway climbs into the clouds, where a little angel covers her giggle. Music notes float on the breeze, a cream soda fizzes, and two warm hands hold up a tiny friend to say I love you.',
+      cv: 'you ♡',
+      sweetness: 5, gloom: 1,
+      mood: 'airy, dreamy, lovesick',
+      motifs: 'clouds · angel · music notes · love notes',
+      look: { filter: 'faded', intensity: 0.5 },
+      bg: '#dfe9f2', pattern: 'dots', pc: 'rgba(60,90,120,.07)',
+      lace: '#ffffff', ink: '#4a5f7a', sub: '#7f94ad', line: '#c4d6e6',
+      slotA: '#e8f0f6', slotB: '#c9d9e8',
+    },
+        // A clean border with no art, in black or white (picked with `tone`)
     plain: {
       name: 'Plain', tagline: 'just you, in black or white', plain: true,
       fortune: 'Nothing hidden, nothing to fear. Just you, exactly as you are.',
