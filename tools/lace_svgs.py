@@ -177,7 +177,7 @@ def ornament_files():
         'BRACKET_SOFT_UNDER': ('bracket-soft-under.svg', fl.bracket('#6d6a72', flip=True)),
         'KEY': ('key.svg', fl.key('#262529')),
         'PLATE': ('keyhole-plate.svg', fl.escutcheon('#262529')),
-        'RABBIT': ('rabbit.svg', fl.rabbit('#141316')),
+        'RABBIT': ('rabbit.svg', fl.rabbit()),
         'PETAL': ('petal.svg', fl.petal()),
     }
 

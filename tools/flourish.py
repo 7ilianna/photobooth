@@ -230,14 +230,18 @@ def escutcheon(color='#262529'):
             f"<path d='{keyhole}' fill='#efeeec'/>{swirls}</svg>")
 
 
-def rabbit(color='#141316'):
-    """A small hopping rabbit silhouette (the April Mae shadow)."""
+def rabbit(color='#a9a7ad'):
+    """A small rabbit mid-hop, drawn as one smooth silhouette (the April Mae shadow)."""
+    body = ("M14 52C10 44 16 34 28 30C40 26 56 28 66 32C70 26 76 22 82 22"
+            "C80 14 82 4 87 2C91 1 92 8 90 16C92 10 96 4 100 5C104 6 102 14 96 22"
+            "C104 24 110 30 110 37C110 42 106 45 100 45C96 45 92 46 90 50"
+            "C88 56 84 60 80 62C86 64 92 66 94 69C95 71 92 72 88 71C80 70 72 68 64 66"
+            "C56 66 48 66 40 64C34 68 26 72 20 72C16 72 15 69 18 67C22 64 26 62 28 60"
+            "C22 60 16 58 14 52Z")
     return ("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 80'>"
-            f"<g fill='{color}'><ellipse cx='52' cy='50' rx='34' ry='20' transform='rotate(-12 52 50)'/>"
-            "<circle cx='88' cy='34' r='13'/><ellipse cx='92' cy='12' rx='5' ry='15' transform='rotate(18 92 12)'/>"
-            "<ellipse cx='83' cy='13' rx='4.5' ry='14' transform='rotate(-6 83 13)'/>"
-            "<circle cx='18' cy='44' r='7'/><ellipse cx='38' cy='68' rx='16' ry='6' transform='rotate(14 38 68)'/>"
-            "<ellipse cx='74' cy='66' rx='8' ry='4'/></g></svg>")
+            f"<path d='{body}' fill='{color}'/>"
+            "<circle cx='9' cy='46' r='6.5' fill='" + color + "'/>"
+            "<circle cx='97' cy='34' r='1.8' fill='#e4e4e3' fill-opacity='.7'/></svg>")
 
 
 def petal(color='#f7f6f4'):
