@@ -5,7 +5,7 @@ A pale, foggy gothic lolita photobooth that runs in your browser: a washed-out s
 ## How it works
 
 1. **Title screen**: press START (or hit Enter) for the menu: New Session, How to Play and Credits.
-2. **Select Frame** (`#/themes`): a lace-covered diary tied with a silver ribbon. Open it and turn the pages in 3D; each frame is an old photograph taped beside a dated diary entry. Choose one and it gets a ribbon bookmark and a "chosen" stamp. Plain Black / Plain White sit underneath, and each frame has a profile card (*Locked Lattice*, *Angel Lullaby*, *Biscuit Waltz* and *Cloud Nine Recital*). Every print is a 1080×1350 Instagram post (4:5) with four photos, two on top and two on the bottom.
+2. **Select Frame** (`#/themes`): photographs drifting on a wheel in the fog. Drag, flick, scroll, use the arrows or tap one; the frame in front is sharp inside the Camera Obscura brackets while the others blur into the mist, and the fog whispers its fortune. Plain Black / Plain White sit underneath, and each frame has a profile card (*Locked Lattice*, *Angel Lullaby*, *Biscuit Waltz* and *Heaven Sent*). Every print is a 1080×1350 Instagram post (4:5) with four photos, two on top and two on the bottom.
 3. **Shoot** (`#/booth`): through a Camera Obscura viewfinder. The capture ring charges during the countdown, the filament glows, *Shutter Chance* flashes, then the shutter clicks and the film winds on. choose a filter (Natural, Digicam, Faded, Monochrome or Pixel), its intensity, and a timer, then strike four poses.
    Tap a thumbnail to retake just that one, or upload photos instead of using the camera.
 4. **Print** (`#/result`): switch frame, filter or intensity, write a caption, add an orange digicam date stamp, add stickers
@@ -45,6 +45,6 @@ Repo **Settings → Pages → Deploy from a branch**, then choose your branch an
 - `js/frames.js`: print layout, the frame list and the renderer
 - `js/filters.js`: photo filters (baked into the print)
 - `js/stickers.js`: vector stickers
-- `js/app.js`: router, camera, booth, diary frame select, floating ribbons, sticker editing and download
+- `js/app.js`: router, camera, booth, frame wheel, floating ribbons, sticker editing and download
 - `tools/`: the ornament generators (`flourish.py`, `lace_svgs.py`) and the stylesheet template
 - `js/sound.js`: music-box chimes, the camera shutter and the ambient lullaby (all synthesised, no audio files)

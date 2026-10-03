@@ -102,30 +102,26 @@
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#dialog').hidden) closeDialog(); });
 
 
-  /* ───────── frame select: a lace-covered diary ───────── */
-  // The diary opens to one spread per frame: a dated entry on the left and the
-  // frame's photograph on the right. Pages turn in 3D; Plain sits underneath.
-  const deckIds = Object.keys(THEMES).filter((id) => !THEMES[id].plain);
+  /* ───────── frame select: photographs drifting on a wheel in the fog ───────── */
+  // The front frame is sharp inside the viewfinder; the others sink back into
+  // the mist, blurred and whited out like a camera's depth of field.
+  // Plain (black or white) sits underneath the wheel.
+  const wheelIds = Object.keys(THEMES).filter((id) => !THEMES[id].plain);
   const plainId = Object.keys(THEMES).find((id) => THEMES[id].plain);
-  const N = deckIds.length;
-  const diary = $('#diary');
-  const leaf = $('#leaf');
-  const pageL = $('#page-left');
-  const pageR = $('#page-right');
+  const N = wheelIds.length;
+  const ring = $('#car-ring');
+  const carousel = $('#carousel');
+  const wrap = (n) => ((n % N) + N) % N;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const single = () => window.matchMedia('(max-width: 720px)').matches;
   const isPlain = () => !!THEMES[state.theme].plain;
-  const wait = (ms) => new Promise((r) => setTimeout(r, reduceMotion ? 0 : ms));
-  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const ordinal = (n) => { const s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
-  const TILTS = [-2.5, 1.8, -1.2, 2.2];
+  const cardSpacing = () => (ring.querySelector('.car-card')?.offsetWidth || 220) * 0.62;
 
-  let spread = 0;        // which frame's spread is open
-  let opened = false;    // has the cover been opened?
-  let picked = false;    // has anything been chosen yet?
-  let turning = false;
+  let pos = Math.max(0, wheelIds.indexOf(state.theme)); // where the wheel is drawn (keeps counting past N)
+  let target = pos;                                      // where it is easing towards
+  let lastIndex = wrap(Math.round(pos));
+  let raf = 0;
 
-  // One chime per action, however fast things happen
+  // One chime per turn, however fast the wheel spins
   let lastChime = 0;
   function chime() {
     const now = performance.now();
@@ -134,170 +130,120 @@
     sound.chime();
   }
 
-  function entryDate(i) {
-    const d = new Date();
-    d.setDate(d.getDate() - (N - i) * 9);
-    return `the ${ordinal(d.getDate())} of ${MONTHS[d.getMonth()]}`;
-  }
-
-  function entryHTML(i) {
-    const t = THEMES[deckIds[i]];
-    return `<div class="entry">
-        <p class="entry-date">${entryDate(i)}</p>
-        <p class="entry-dear">Dear diary,</p>
-        <p class="entry-text">${t.bio || ''}</p>
-        <p class="entry-ps">P.S. ${t.fortune || ''}</p>
-        <span class="entry-bow" aria-hidden="true"></span>
-        <span class="page-num">${2 * i + 1}</span>
-      </div>`;
-  }
-
-  function photoHTML(i) {
-    const id = deckIds[i], t = THEMES[id];
-    const chosen = picked && state.theme === id;
-    return `<div class="photo-page${chosen ? ' is-chosen' : ''}">
-        <p class="entry-date entry-mini">${entryDate(i)}</p>
-        <figure class="photo" style="--tilt:${TILTS[i % TILTS.length]}deg">
-          <span class="photo-tape" aria-hidden="true"></span>
-          <canvas data-theme="${id}" aria-hidden="true"></canvas>
-          <span class="pc pc-tl"></span><span class="pc pc-tr"></span><span class="pc pc-bl"></span><span class="pc pc-br"></span>
-          <span class="photo-flash" aria-hidden="true"></span>
-        </figure>
-        <p class="photo-cap"><b>${t.name}</b><i>${t.tagline || ''}</i></p>
-        <p class="entry-ps entry-mini">P.S. ${t.fortune || ''}</p>
-        <button class="choose-btn" type="button" data-choose="${id}" aria-pressed="${chosen}">${chosen ? 'chosen ♡' : 'choose this photograph'}</button>
-        <span class="bookmark" aria-hidden="true"></span>
-        <span class="stamp" aria-hidden="true">chosen</span>
-        <span class="page-num">${2 * i + 2}</span>
-      </div>`;
-  }
-
-  function setPage(el, html) {
-    el.innerHTML = html;
-    el.querySelectorAll('canvas[data-theme]').forEach((cv) => {
-      renderStrip(cv, { theme: cv.dataset.theme, scale: 0.24, caption: state.caption, showDate: false });
+  function buildCarousel() {
+    ring.innerHTML = '';
+    wheelIds.forEach((id, n) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'car-card';
+      b.dataset.n = n;
+      b.setAttribute('aria-label', THEMES[id].name);
+      b.append(document.createElement('canvas'));
+      const label = document.createElement('span');
+      label.textContent = THEMES[id].name;
+      b.append(label);
+      b.addEventListener('click', (e) => {
+        if (moved) { e.preventDefault(); return; }
+        goTo(nearest(n));
+      });
+      ring.append(b);
     });
-    el.querySelectorAll('[data-choose]').forEach((b) => b.addEventListener('click', () => choosePhoto(b.dataset.choose)));
+    paintCarousel();
   }
 
-  function showSpread(i) {
-    setPage(pageL, entryHTML(i));
-    setPage(pageR, photoHTML(i));
-    $('#page-no').textContent = `photograph ${i + 1} of ${N}`;
-    $('#page-prev').disabled = i === 0;
-    $('#page-next').disabled = i === N - 1;
+  // The copy of frame n closest to where the wheel is heading
+  function nearest(n) {
+    const base = Math.round(target);
+    const diff = wrap(n - base);
+    return base + (diff > N / 2 ? diff - N : diff);
   }
 
-  async function openDiary() {
-    if (opened) return;
-    opened = true;
-    showSpread(spread);
-    diary.dataset.state = 'opening';
-    [1046.5, 1318.5, 1568.0].forEach((f, k) => sound.note(f, k * 0.16));
-    await wait(1400);
-    diary.dataset.state = 'open';
-    speak(picked && !isPlain()
-      ? `You chose ${THEMES[state.theme].name}. Turn the pages if your heart has changed…`
-      : 'Turn the pages, darling. Choose the photograph you like best…');
-  }
-  $('#book-cover').addEventListener('click', openDiary);
-
-  // Turn one page forwards (d = 1) or backwards (d = -1)
-  async function turn(d) {
-    const to = spread + d;
-    if (turning || !opened || to < 0 || to >= N) return;
-    turning = true;
-    sound.note(d > 0 ? 1568.0 : 1318.5);
-    const one = single();
-    const front = leaf.querySelector('.leaf-front');
-    const back = leaf.querySelector('.leaf-back');
-    leaf.className = `leaf ${one ? 'one' : d > 0 ? 'fwd' : 'bwd'}`;
-    let from = 'rotateY(0deg)', target;
-    if (one) {
-      if (d > 0) { setPage(front, photoHTML(spread)); back.innerHTML = ''; setPage(pageR, photoHTML(to)); target = 'rotateY(-180deg)'; }
-      else { setPage(front, photoHTML(to)); back.innerHTML = ''; from = 'rotateY(-180deg)'; target = 'rotateY(0deg)'; }
-    } else if (d > 0) {
-      setPage(front, photoHTML(spread)); setPage(back, entryHTML(to)); setPage(pageR, photoHTML(to)); target = 'rotateY(-180deg)';
-    } else {
-      setPage(front, entryHTML(spread)); setPage(back, photoHTML(to)); setPage(pageL, entryHTML(to)); target = 'rotateY(180deg)';
-    }
-    leaf.style.transform = from;
-    leaf.hidden = false;
-    void leaf.offsetWidth;
-    leaf.classList.add('is-turning');
-    leaf.style.transform = target;
-    await wait(1000);
-    spread = to;
-    showSpread(to);
-    leaf.hidden = true;
-    leaf.classList.remove('is-turning');
-    turning = false;
-    speak(THEMES[deckIds[to]].fortune);
-  }
-  $('#page-prev').addEventListener('click', () => turn(-1));
-  $('#page-next').addEventListener('click', () => turn(1));
-  diary.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') { e.preventDefault(); turn(-1); }
-    if (e.key === 'ArrowRight') { e.preventDefault(); turn(1); }
-  });
-  let swipeX = null;
-  $('#book').addEventListener('pointerdown', (e) => { swipeX = e.clientX; });
-  $('#book').addEventListener('pointerup', (e) => {
-    if (swipeX === null) return;
-    const dx = e.clientX - swipeX;
-    swipeX = null;
-    if (Math.abs(dx) > 50) turn(dx < 0 ? 1 : -1);
-  });
-
-  function choosePhoto(id) {
-    picked = true;
-    state.theme = id;
-    syncPlainButtons();
-    renderProfile();
-    setPage(pageR, photoHTML(spread));
-    const ph = pageR.querySelector('.photo');
-    if (ph && !reduceMotion) ph.classList.add('is-flash');
-    sound.shutter();
-    speak(`${THEMES[id].name}… a lovely choice. The camera is ready whenever you are ♡`);
-  }
-
-  // The diary speaks, like a PS2 dialogue box
-  let speakToken = 0;
-  function speak(text) {
-    const token = ++speakToken;
-    const typed = $('#fortune-typed');
-    const box = $('#fortune');
-    $('#fortune-full').textContent = text;
-    box.classList.remove('is-done');
-    if (reduceMotion) { typed.textContent = text; box.classList.add('is-done'); return; }
-    typed.textContent = '';
-    let i = 0;
-    (function step() {
-      if (token !== speakToken) return;
-      typed.textContent = text.slice(0, ++i);
-      if (i < text.length) setTimeout(step, text[i - 1] === '.' || text[i - 1] === '…' ? 140 : 26);
-      else box.classList.add('is-done');
-    })();
-  }
-
-  function renderThemes() {
-    if (picked && !isPlain()) spread = deckIds.indexOf(state.theme);
-    if (opened) showSpread(spread);
-    diary.dataset.state = opened ? 'open' : 'closed';
+  function paintCarousel() {
+    ring.querySelectorAll('.car-card').forEach((b) => {
+      renderStrip(b.querySelector('canvas'), { theme: wheelIds[b.dataset.n], scale: 0.26, caption: state.caption, showDate: false });
+    });
     document.querySelectorAll('.plain-opt').forEach((b) => {
       renderStrip(b.querySelector('canvas'), { theme: plainId, tone: b.dataset.plain, scale: 0.1, caption: state.caption, showDate: false });
     });
+  }
+
+  // Lay every card out along a gentle arc around the current position
+  function layoutCarousel() {
+    const spacing = cardSpacing();
+    const resting = isPlain();
+    ring.querySelectorAll('.car-card').forEach((b) => {
+      let off = +b.dataset.n - pos;
+      off = (((off % N) + N + N / 2) % N) - N / 2; // wrap into [-N/2, N/2)
+      const a = Math.abs(off);
+      const x = off * spacing * (1 - Math.min(a, 2) * 0.1);
+      const rot = Math.max(-55, Math.min(55, -off * 40));
+      const z = -Math.min(a, 2.5) * 160;
+      const scale = 1 - Math.min(a, 2) * 0.08;
+      // fade out before a card wraps round the back, however few frames there are
+      const opacity = Math.max(0, Math.min(1, 1.9 - a, (N / 2 - a) * 2.5));
+      b.style.transform = `translateX(${x.toFixed(2)}px) translateZ(${z.toFixed(1)}px) rotateY(${rot.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+      b.style.opacity = opacity.toFixed(3);
+      b.style.zIndex = String(100 - Math.round(a * 10));
+      const fog = Math.min(a, 1.6) + (resting ? 0.6 : 0);
+      b.style.filter = `blur(${(fog * 2.6).toFixed(2)}px) brightness(${(1 + fog * 0.1).toFixed(3)}) saturate(${Math.max(0.3, 1 - fog * 0.4).toFixed(3)})`;
+      b.style.pointerEvents = opacity < 0.2 ? 'none' : '';
+      b.classList.toggle('is-front', a < 0.5 && !resting);
+      b.tabIndex = a < 0.5 ? 0 : -1;
+    });
+  }
+
+  // Ease towards the target every frame; update the profile as frames pass the front
+  function tick() {
+    raf = 0;
+    const d = target - pos;
+    pos = reduceMotion || Math.abs(d) < 0.0005 ? target : pos + d * 0.12;
+    layoutCarousel();
+    const idx = wrap(Math.round(pos));
+    if (idx !== lastIndex && !isPlain()) {
+      lastIndex = idx;
+      state.theme = wheelIds[idx];
+      chime();
+      renderProfile();
+      speak(THEMES[state.theme].fortune);
+    }
+    if (pos !== target || carDrag) raf = requestAnimationFrame(tick);
+  }
+  function kick() { if (!raf) raf = requestAnimationFrame(tick); }
+
+  // Touching the wheel while Plain is chosen brings the front art frame back
+  function leavePlain() {
+    if (!isPlain()) return;
+    lastIndex = wrap(Math.round(target));
+    state.theme = wheelIds[lastIndex];
     syncPlainButtons();
     renderProfile();
-    if (!opened) speak('A diary, tied with a silver ribbon. Open it, if you like…');
-    else if (picked) speak(isPlain() ? THEMES[plainId].fortune : `Welcome back. ${THEMES[state.theme].name} is still waiting for you ♡`);
+  }
+
+  function goTo(t) {
+    leavePlain();
+    target = t;
+    kick();
+  }
+
+  function renderThemes() {
+    if (ring.children.length !== N) buildCarousel(); else paintCarousel();
+    if (!isPlain()) {
+      const i = wheelIds.indexOf(state.theme);
+      pos = target = Math.round(pos) - wrap(Math.round(pos)) + i;
+      lastIndex = i;
+    }
+    layoutCarousel();
+    syncPlainButtons();
+    renderProfile();
+    speak(THEMES[state.theme].fortune || 'Drag the photographs through the fog, darling…');
   }
 
   function renderProfile() {
     const t = THEMES[state.theme];
-    $('#profile').hidden = !picked;
     const toneName = state.tone === 'white' ? 'White' : 'Black';
-    $('#profile-no').textContent = t.plain ? 'Plain photograph' : `Photograph ${deckIds.indexOf(state.theme) + 1} of ${N}`;
+    $('#profile-no').textContent = t.plain
+      ? 'Plain frame'
+      : `Frame No.${String(wheelIds.indexOf(state.theme) + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}`;
     $('#profile-name').textContent = t.plain ? `Plain ${toneName}` : t.name;
     $('#profile-tagline').textContent = t.tagline || '';
     $('#profile-bio').textContent = t.bio || '';
@@ -321,17 +267,71 @@
     $('#coming-soon').hidden = !Object.values(THEMES).some((x) => x.placeholder && !x.image);
   }
 
-  // Plain Black / Plain White, under the diary
+  // Drag (mouse or finger) scrubs the wheel; a flick lets it coast a little
+  let carDrag = null;
+  let moved = false;
+  carousel.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0 || e.target.closest('.car-arrow')) return;
+    const now = performance.now();
+    carDrag = { x: e.clientX, start: target, lastX: e.clientX, lastT: now, v: 0 };
+    moved = false;
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!carDrag) return;
+    const dx = e.clientX - carDrag.x;
+    if (!moved && Math.abs(dx) < 6) return;
+    if (!moved) { moved = true; leavePlain(); }
+    const now = performance.now();
+    carDrag.v = (e.clientX - carDrag.lastX) / Math.max(1, now - carDrag.lastT);
+    carDrag.lastX = e.clientX;
+    carDrag.lastT = now;
+    pos = target = carDrag.start - dx / cardSpacing();
+    kick();
+  });
+  window.addEventListener('pointerup', () => {
+    if (!carDrag) return;
+    if (moved) {
+      const fling = Math.max(-2, Math.min(2, (-carDrag.v * 220) / cardSpacing()));
+      target = Math.round(target + fling);
+      kick();
+    }
+    carDrag = null;
+    setTimeout(() => { moved = false; }, 0);
+  });
+
+  // Trackpads scroll continuously; a mouse wheel notch moves one frame
+  let wheelSnap = 0;
+  carousel.addEventListener('wheel', (e) => {
+    const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (!d) return;
+    e.preventDefault();
+    leavePlain();
+    const unit = e.deltaMode === 1 ? 0.34 : 1 / 180;
+    target += Math.max(-1, Math.min(1, d * unit));
+    kick();
+    clearTimeout(wheelSnap);
+    wheelSnap = setTimeout(() => { target = Math.round(target); kick(); }, 160);
+  }, { passive: false });
+
+  $('#car-prev').addEventListener('click', () => goTo(Math.round(target) - 1));
+  $('#car-next').addEventListener('click', () => goTo(Math.round(target) + 1));
+  carousel.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(Math.round(target) - 1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); goTo(Math.round(target) + 1); }
+  });
+  window.addEventListener('resize', () => { if (current === 'themes') layoutCarousel(); });
+
+  // Plain Black / Plain White, under the wheel
   function syncPlainButtons() {
-    const plain = isPlain() && picked;
+    const plain = isPlain();
     document.querySelectorAll('.plain-opt').forEach((b) => pressed(b, plain && b.dataset.plain === state.tone));
+    carousel.classList.toggle('is-resting', plain);
   }
   document.querySelectorAll('.plain-opt').forEach((b) => b.addEventListener('click', () => {
-    picked = true;
     state.theme = plainId;
     state.tone = b.dataset.plain;
-    if (opened) setPage(pageR, photoHTML(spread));
     syncPlainButtons();
+    layoutCarousel();
     renderProfile();
     speak(THEMES[plainId].fortune);
   }));
@@ -344,7 +344,26 @@
   }
   document.querySelectorAll('[data-tone]').forEach((b) => b.addEventListener('click', () => setTone(b.dataset.tone)));
 
-  /* ───────── ribbons and lace scraps drifting through the fog ───────── */
+  // The fog speaks, like a PS2 dialogue box
+  let speakToken = 0;
+  function speak(text) {
+    const token = ++speakToken;
+    const typed = $('#fortune-typed');
+    const box = $('#fortune');
+    $('#fortune-full').textContent = text;
+    box.classList.remove('is-done');
+    if (reduceMotion) { typed.textContent = text; box.classList.add('is-done'); return; }
+    typed.textContent = '';
+    let i = 0;
+    (function step() {
+      if (token !== speakToken) return;
+      typed.textContent = text.slice(0, ++i);
+      if (i < text.length) setTimeout(step, text[i - 1] === '.' || text[i - 1] === '…' ? 140 : 26);
+      else box.classList.add('is-done');
+    })();
+  }
+
+  /* ───────── ribbons and petals drifting through the fog ───────── */
   (function spawnFloaters() {
     if (reduceMotion) return;
     const host = $('#floaters');

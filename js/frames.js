@@ -68,7 +68,7 @@ window.KB = window.KB || {};
       slotA: '#f2e8e6', slotB: '#dccbc6',
     },
     sky: {
-      name: 'Cloud Nine Recital', tagline: 'a love note sent from above', overlay: 'frames/theme-4.png', footer: false,
+      name: 'Heaven Sent', tagline: 'a love note sent from above', overlay: 'frames/theme-4.png', footer: false,
       fortune: 'Someone up there is humming your name. Answer them with a smile ♡',
       bio: 'A stairway climbs into the clouds, where a little angel covers her giggle. Music notes float on the breeze, a cream soda fizzes, and two warm hands hold up a tiny friend to say I love you.',
       cv: 'you ♡',

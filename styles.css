@@ -564,287 +564,91 @@ main {
   background: repeating-linear-gradient(90deg, var(--ink-3) 0 2px, transparent 2px 4px);
 }
 
-/* ───────── the diary (frame select) ───────── */
-.diary {
-  --page-w: 380px;
-  --page-h: 520px;
+/* ───────── frame select: photographs drifting on a wheel in the fog ───────── */
+.carousel {
+  --card-w: 230px;
   position: relative;
-  outline-offset: 8px;
-}
-.book {
-  position: relative;
-  width: calc(var(--page-w) * 2);
-  max-width: 100%;
-  height: var(--page-h);
-  margin: 10px auto 0;
-  perspective: 2400px;
-  transition: transform 1.2s cubic-bezier(.4, .1, .2, 1);
-}
-.diary[data-state="closed"] .book { transform: translateX(calc(var(--page-w) / -2)); }
-.page {
-  position: absolute;
-  top: 0;
-  width: var(--page-w);
-  height: var(--page-h);
   overflow: hidden;
-  background:
-    linear-gradient(90deg, rgba(200, 140, 150, .22) 0 1px, transparent 1px) 46px 0 / 100% 100% no-repeat,
-    repeating-linear-gradient(transparent 0 29px, rgba(130, 150, 180, .16) 29px 30px) 0 18px,
-    radial-gradient(130% 100% at 50% 0, #fffdf9, var(--paper) 60%, #f1ebe2);
-  box-shadow: inset 0 0 0 1px rgba(150, 138, 128, .25);
-  transition: opacity .6s;
+  margin: -6px -10px 0;
+  padding: 18px 0 6px;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  outline-offset: -4px;
+  /* the edges dissolve into the fog */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
 }
-.page-left { left: 0; border-radius: 6px 0 0 6px; box-shadow: inset -26px 0 30px -18px rgba(110, 96, 84, .35), inset 0 0 0 1px rgba(150, 138, 128, .25); }
-.page-right { left: var(--page-w); border-radius: 0 6px 6px 0; box-shadow: inset 26px 0 30px -18px rgba(110, 96, 84, .35), inset 0 0 0 1px rgba(150, 138, 128, .25); }
-.diary[data-state="closed"] .page, .diary[data-state="closed"] .spine, .diary[data-state="closed"] .diary-nav { opacity: 0; pointer-events: none; }
-.spine {
+.car-stage { position: relative; height: calc(var(--card-w) * 1.25 + 78px); }
+.car-ring { position: absolute; inset: 0; perspective: 1100px; }
+.car-card {
   position: absolute;
-  left: calc(var(--page-w) - 6px);
-  top: 0;
-  width: 12px;
-  height: var(--page-h);
-  background: linear-gradient(90deg, rgba(110, 96, 84, .0), rgba(110, 96, 84, .28), rgba(110, 96, 84, .0));
-  pointer-events: none;
-  transition: opacity .6s;
-}
-
-/* the cover: quilted white satin, scroll brackets, a keyhole plate and a silver ribbon */
-.book-cover {
-  position: absolute;
-  top: 0;
-  left: var(--page-w);
-  width: var(--page-w);
-  height: var(--page-h);
+  left: 50%; top: 6px;
+  width: var(--card-w);
+  margin-left: calc(var(--card-w) / -2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
   padding: 0;
-  border: 1px solid rgba(35, 34, 38, .3);
-  outline: 1px solid rgba(35, 34, 38, .15);
-  outline-offset: -9px;
-  border-radius: 4px 10px 10px 4px;
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='34' viewBox='0 0 34 34'%3E%3Cpath d='M0 0L34 34M34 0L0 34' stroke='%23cfc6bb' stroke-width='.8'/%3E%3Ccircle cx='17' cy='17' r='1.8' fill='%23fff' stroke='%23c2b8ad' stroke-width='.6'/%3E%3Ccircle cx='0' cy='0' r='1.8' fill='%23fff' stroke='%23c2b8ad' stroke-width='.6'/%3E%3Ccircle cx='34' cy='0' r='1.8' fill='%23fff' stroke='%23c2b8ad' stroke-width='.6'/%3E%3Ccircle cx='0' cy='34' r='1.8' fill='%23fff' stroke='%23c2b8ad' stroke-width='.6'/%3E%3Ccircle cx='34' cy='34' r='1.8' fill='%23fff' stroke='%23c2b8ad' stroke-width='.6'/%3E%3C/svg%3E") 0 0 / 34px 34px,
-    radial-gradient(120% 90% at 40% 30%, #ffffff, #f2eee8 60%, #e4ded6);
-  background-clip: padding-box;
-  transform-origin: left center;
-  transform-style: preserve-3d;
-  transition: transform 1.3s cubic-bezier(.45, .05, .25, 1), opacity .5s ease .9s;
-  filter: drop-shadow(0 0 1px rgba(120, 108, 96, .4)) drop-shadow(12px 18px 28px var(--shadow));
-  z-index: 5;
-}
-.book-cover:hover { transform: rotateY(-8deg); }
-.diary[data-state="opening"] .book-cover { transform: rotateY(-178deg); opacity: 0; }
-.diary[data-state="open"] .book-cover { display: none; }
-.cover-bracket {
-  position: absolute;
-  left: 10%; right: 10%; top: 24%;
-  aspect-ratio: 5 / 1;
-  background: url("assets/ornaments/bracket-soft.svg") center / contain no-repeat;
-}
-.cover-bracket.under { top: 56%; background-image: url("assets/ornaments/bracket-soft-under.svg"); }
-.cover-title {
-  position: absolute;
-  left: 0; right: 0; top: 42%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  font: 400 15px var(--f-sans);
-  letter-spacing: .3em;
-  color: var(--ink-2);
-  text-shadow: 0 0 6px #fff, 0 0 14px #fff;
-}
-.cover-title em { font: 400 64px/1.1 var(--f-script); letter-spacing: 0; font-style: normal; color: var(--ink); }
-.cover-ribbon {
-  position: absolute;
-  top: 0; bottom: 0; right: 16%;
-  width: 22px;
-  background: linear-gradient(90deg, #cfcbd0, #f7f6f8 40%, #dcd8dd 60%, #bdb8bf);
-  box-shadow: 0 0 6px rgba(80, 66, 56, .2);
-}
-.cover-bow {
-  position: absolute;
-  right: calc(16% - 30px); top: 58%;
-  width: 82px; height: 60px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 44'%3E%3Cg fill='%23fff' stroke='%23cbc2b8' stroke-width='1.3' stroke-linejoin='round'%3E%3Cpath d='M29 22L18 41l6-1 3 4 4-20z'/%3E%3Cpath d='M31 22l11 19-6-1-3 4-4-20z'/%3E%3Cpath d='M30 20C22 6 6 4 5 14s16 14 25 6z'/%3E%3Cpath d='M30 20C38 6 54 4 55 14s-16 14-25 6z'/%3E%3Cpath d='M12 13c5-2 11 1 15 6M48 13c-5-2-11 1-15 6' fill='none'/%3E%3Crect x='25.5' y='15.5' width='9' height='10' rx='3.5'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
-  filter: drop-shadow(0 4px 4px var(--shadow));
-}
-.cover-lock {
-  position: absolute;
-  left: -12px; top: 50%;
-  width: 50px;
-  aspect-ratio: 200 / 236;
-  transform: translateY(-50%);
-  background: url("assets/ornaments/keyhole-plate.svg") center / contain no-repeat;
-  filter: drop-shadow(0 3px 4px var(--shadow));
-}
-.cover-hint {
-  position: absolute;
-  left: 0; right: 0; bottom: 6%;
-  font: italic 17px var(--f-serif);
-  color: var(--ink-3);
-  animation: blink 2.4s ease-in-out infinite;
-}
-
-/* the turning leaf */
-.leaf {
-  position: absolute;
-  top: 0;
-  width: var(--page-w);
-  height: var(--page-h);
-  transform-style: preserve-3d;
-  z-index: 4;
-}
-.leaf.is-turning { transition: transform 1s cubic-bezier(.45, .05, .3, 1); }
-.leaf.fwd, .leaf.one { left: var(--page-w); transform-origin: left center; }
-.leaf.bwd { left: 0; transform-origin: right center; }
-.leaf-face { left: 0 !important; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-.leaf-back { transform: rotateY(180deg); }
-.leaf-face::after {
-  /* a soft shadow that sweeps across the page as it turns */
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(90deg, rgba(110, 96, 84, .18), transparent 40%);
-}
-
-/* left page: the diary entry */
-.entry { position: absolute; inset: 0; padding: 26px 34px 30px 62px; }
-.entry-date { margin: 0 0 6px; font: italic 400 17px var(--f-serif); color: var(--ink-3); text-align: right; }
-.entry-dear { margin: 0; font: italic 500 26px/30px var(--f-serif); color: var(--ink); }
-.entry-text { margin: 0; font: italic 400 19px/30px var(--f-serif); color: var(--ink-2); }
-.entry-ps { margin: 30px 0 0; font: italic 400 18px/30px var(--f-serif); color: var(--ink-2); }
-.entry-bow {
-  position: absolute;
-  right: 28px; bottom: 44px;
-  width: 64px; height: 46px;
-  background: var(--bow-dark) center / contain no-repeat;
-  opacity: .8;
-  transform: rotate(-12deg);
-}
-.page-num {
-  position: absolute;
-  left: 0; right: 0; bottom: 12px;
-  text-align: center;
-  font: italic 15px var(--f-serif);
-  color: var(--ink-3);
-}
-.page-num::before { content: "— "; }
-.page-num::after { content: " —"; }
-
-/* right page: the photograph */
-.photo-page {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 22px 26px 34px;
-}
-.entry-mini { display: none; }
-.photo {
-  position: relative;
-  width: 64%;
-  margin: 0;
-  padding: 9px 9px 26px;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(80, 66, 56, .25), 0 10px 22px var(--shadow);
-  transform: rotate(var(--tilt, 0deg));
-}
-.photo canvas { display: block; width: 100%; height: auto; filter: sepia(.08) saturate(.92); }
-.photo-tape {
-  position: absolute;
-  left: 50%; top: -12px;
-  width: 64px; height: 22px;
-  transform: translateX(-50%) rotate(-4deg);
-  background:
-    radial-gradient(circle, rgba(140, 128, 118, .25) 1px, transparent 1.4px) 0 0 / 6px 6px,
-    rgba(255, 255, 255, .78);
-  box-shadow: 0 1px 2px rgba(80, 66, 56, .2);
-  z-index: 2;
-}
-.pc {
-  /* little paper photo corners */
-  position: absolute;
-  width: 18px; height: 18px;
-  background: linear-gradient(135deg, #d7d0c8 50%, transparent 50%);
-}
-.pc-tl { left: -4px; top: -4px; }
-.pc-tr { right: -4px; top: -4px; transform: rotate(90deg); }
-.pc-br { right: -4px; bottom: -4px; transform: rotate(180deg); }
-.pc-bl { left: -4px; bottom: -4px; transform: rotate(270deg); }
-.photo-flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
-.photo.is-flash .photo-flash { animation: photo-flash .9s ease-out; }
-@keyframes photo-flash { 0% { opacity: 1; } 100% { opacity: 0; } }
-.photo-cap { margin: 4px 0 0; text-align: center; line-height: 1.2; }
-.photo-cap b { display: block; font: italic 500 26px var(--f-serif); color: var(--ink); }
-.photo-cap i { font-size: 17px; color: var(--ink-3); }
-.choose-btn {
-  padding: 6px 18px;
-  border: 1px dotted rgba(47, 45, 49, .5);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, .7);
-  color: var(--ink);
-  font: 500 15px var(--f-caps);
-  letter-spacing: .16em;
-  transition: background .2s, box-shadow .2s;
-}
-.choose-btn:hover { background: #fff; box-shadow: 0 0 0 3px rgba(255, 255, 255, .8), 0 0 18px var(--glow); }
-.choose-btn[aria-pressed="true"] { border-style: solid; background: #fff; }
-.bookmark, .stamp { display: none; }
-.is-chosen .bookmark {
-  /* a silver satin ribbon bookmark */
-  display: block;
-  position: absolute;
-  top: -4px; right: 34px;
-  width: 22px; height: 92px;
-  background: linear-gradient(90deg, #c6c1c7, #f8f7f9 45%, #d6d2d7 60%, #b6b0b8);
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 84%, 0 100%);
-  filter: drop-shadow(0 2px 2px var(--shadow));
-}
-.is-chosen .stamp {
-  display: grid;
-  place-items: center;
-  position: absolute;
-  left: 22px; top: 22px;
-  width: 78px; height: 78px;
-  border: 2px solid rgba(87, 84, 90, .55);
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px rgba(87, 84, 90, .4);
-  font: 600 14px var(--f-caps);
-  letter-spacing: .2em;
-  color: rgba(87, 84, 90, .75);
-  transform: rotate(-14deg);
-  animation: stamp .5s cubic-bezier(.3, 1.6, .5, 1);
-}
-@keyframes stamp { from { transform: rotate(-14deg) scale(1.8); opacity: 0; } }
-
-.diary-nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-  margin-top: 30px;
-  transition: opacity .6s;
-}
-.page-btn {
-  padding: 4px 10px;
   border: 0;
   background: none;
-  font: italic 19px var(--f-serif);
-  color: var(--ink-2);
-  text-decoration: underline dotted;
-  text-underline-offset: 4px;
+  color: var(--ink);
+  font: inherit;
+  will-change: transform, opacity, filter;
+  -webkit-tap-highlight-color: transparent;
 }
-.page-btn:disabled { opacity: .3; text-decoration: none; }
-.page-no { font: 500 14px var(--f-caps); letter-spacing: .2em; color: var(--ink-3); }
+.car-card canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  /* an old photograph: white border, soft shadow */
+  border: 7px solid #fff;
+  border-bottom-width: 22px;
+  box-shadow: 0 1px 2px rgba(60, 62, 72, .25), 0 16px 30px var(--shadow);
+}
+.car-card span { font: 400 26px var(--f-script); color: var(--ink); opacity: 0; transition: opacity .4s; white-space: nowrap; }
+.car-card.is-front span { opacity: 1; }
+/* Camera Obscura brackets that frame whatever is in focus */
+.car-focus {
+  position: absolute;
+  left: 50%; top: 0;
+  width: calc(var(--card-w) + 34px);
+  height: calc(var(--card-w) * 1.25 + 40px);
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 200;
+}
+.cf { position: absolute; width: 26px; height: 26px; border: 1.5px solid rgba(35, 34, 38, .55); }
+.cf.tl { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+.cf.tr { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+.cf.bl { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+.cf.br { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+.carousel.is-resting .car-focus { opacity: .25; }
+.car-arrow {
+  position: absolute;
+  top: 44%;
+  z-index: 210;
+  width: 46px; height: 46px;
+  border: 1px solid rgba(35, 34, 38, .4);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .75);
+  color: var(--ink);
+  font: 400 30px/1 var(--f-serif);
+  transition: background .2s, box-shadow .2s;
+}
+.car-arrow:hover { background: #fff; box-shadow: 0 0 18px var(--glow); }
+.car-arrow.prev { left: 14%; }
+.car-arrow.next { right: 14%; }
+.car-hint { margin: 4px 0 6px; text-align: center; font: 400 14px var(--f-sans); color: var(--ink-3); }
 
-/* the diary speaks, like a PS2 dialogue box */
+/* the fog speaks, like a PS2 dialogue box */
 .fortune {
   position: relative;
   max-width: 660px;
-  margin: 26px auto 18px;
-  padding: 22px 28px 18px;
+  margin: 14px auto 16px;
+  padding: 18px 26px 14px;
   border: 1px solid rgba(47, 45, 49, .4);
   border-radius: 6px;
   background: rgba(255, 255, 255, .78);
@@ -1230,27 +1034,11 @@ main {
   .tray-card .btn { width: auto; display: flex; max-width: 320px; margin: 0 auto; }
   #result-canvas { max-height: 75vh; }
 }
-@media (max-width: 720px) {
-  /* the diary shows one page at a time */
-  .diary { --page-w: min(330px, calc(100vw - 80px)); --page-h: calc(var(--page-w) * 1.5); }
-  .book { width: var(--page-w); }
-  .diary[data-state="closed"] .book { transform: none; }
-  .page-left, .spine { display: none; }
-  .page-right, .book-cover, .leaf.fwd, .leaf.bwd, .leaf.one { left: 0; }
-  .entry-mini { display: block; }
-  .photo-page { gap: 8px; padding: 18px 18px 30px; justify-content: flex-start; }
-  .photo-page .entry-date { align-self: flex-end; margin: 0; font-size: 15px; }
-  .photo-page .entry-ps { margin: 0; font-size: 15px; line-height: 22px; text-align: center; }
-  .photo { width: 56%; padding: 7px 7px 20px; }
-  .choose-btn { font-size: 13px; letter-spacing: .1em; white-space: nowrap; padding: 5px 14px; }
-  .diary-nav { gap: 10px; }
-  .page-btn { white-space: nowrap; font-size: 17px; }
-  .page-no { font-size: 12px; letter-spacing: .12em; text-align: center; }
-  .photo-cap b { font-size: 22px; }
-  .is-chosen .stamp { width: 60px; height: 60px; font-size: 11px; left: 12px; top: 44px; }
-  .cover-title em { font-size: 42px; }
-}
 @media (max-width: 560px) {
+  .carousel { --card-w: 150px; }
+  .car-arrow { width: 38px; height: 38px; font-size: 24px; }
+  .car-arrow.prev { left: 4%; }
+  .car-arrow.next { right: 4%; }
   body { font-size: 18px; }
   main { padding: 20px 16px 48px; }
   .topbar { padding: 50px 16px 12px; justify-content: center; }
@@ -1285,7 +1073,7 @@ main {
 }
 
 /* ───────── a little silver key for the cursor ───────── */
-a, button, label, summary, select, .chip, .swatch, .sticker-btn, .book-cover,
+a, button, label, summary, select, .chip, .swatch, .sticker-btn, .car-card,
 input[type="checkbox"], input[type="range"], #result-canvas { cursor: var(--cursor-key-hover) !important; }
 #result-canvas.dragging { cursor: grabbing !important; }
 input[type="text"] { cursor: text; }

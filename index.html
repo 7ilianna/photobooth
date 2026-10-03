@@ -84,35 +84,21 @@
         <h2 class="section-title">Select Frame</h2>
         <p class="sub">Four poses, two on top and two on the bottom, sized for an Instagram post.</p>
         <div class="pearl-row" aria-hidden="true"></div>
-        <div id="diary" class="diary" data-state="closed">
-          <div id="book" class="book">
-            <div id="page-left" class="page page-left"></div>
-            <div id="page-right" class="page page-right"></div>
-            <div id="leaf" class="leaf" hidden>
-              <div class="leaf-face leaf-front page"></div>
-              <div class="leaf-face leaf-back page"></div>
+        <div id="carousel" class="carousel" tabindex="0" aria-roledescription="carousel"
+             aria-label="Frames. Drag, scroll or use the arrow keys to turn the wheel.">
+          <button id="car-prev" class="car-arrow prev" type="button" aria-label="Previous frame">‹</button>
+          <div class="car-stage">
+            <div id="car-ring" class="car-ring"></div>
+            <div class="car-focus" aria-hidden="true">
+              <span class="cf tl"></span><span class="cf tr"></span><span class="cf bl"></span><span class="cf br"></span>
             </div>
-            <span class="spine" aria-hidden="true"></span>
-            <button id="book-cover" class="book-cover" type="button" aria-label="Open the diary">
-              <span class="cover-quilt" aria-hidden="true"></span>
-              <span class="cover-bracket" aria-hidden="true"></span>
-              <span class="cover-title" aria-hidden="true">a diary<em>of dolls</em></span>
-              <span class="cover-bracket under" aria-hidden="true"></span>
-              <span class="cover-ribbon" aria-hidden="true"></span>
-              <span class="cover-bow" aria-hidden="true"></span>
-              <span class="cover-lock" aria-hidden="true"></span>
-              <span class="cover-hint" aria-hidden="true">tap to open</span>
-            </button>
           </div>
-          <div class="diary-nav" id="diary-nav">
-            <button id="page-prev" class="page-btn" type="button">‹ previous page</button>
-            <span id="page-no" class="page-no"></span>
-            <button id="page-next" class="page-btn" type="button">next page ›</button>
-          </div>
+          <button id="car-next" class="car-arrow next" type="button" aria-label="Next frame">›</button>
         </div>
+        <p class="car-hint">drag, scroll or tap a photograph to turn the wheel</p>
 
         <div id="fortune" class="fortune">
-          <span class="fortune-who">The Diary</span>
+          <span class="fortune-who">The Fog</span>
           <p class="fortune-text"><span id="fortune-typed" aria-hidden="true"></span><span id="fortune-full" class="sr-only" aria-live="polite"></span><b class="fortune-more" aria-hidden="true">▼</b></p>
         </div>
 
@@ -285,7 +271,7 @@
 
   <template id="tpl-howto">
     <ol class="howto">
-      <li><b>Open the diary</b> and turn its pages. Each frame is an old photograph with its own entry. Choose the one you like best.</li>
+      <li><b>Choose a frame.</b> Drag, scroll or tap the photographs drifting in the fog until the one you love is in focus.</li>
       <li><b>Pick a filter</b> and slide its intensity, then choose a timer.</li>
       <li><b>Press Start</b> and hold still while the camera charges, then strike four poses. Tap any photo to retake it. No camera? Upload four photos instead.</li>
       <li><b>Decorate</b> with stickers and a digicam date, then save your 1080 × 1350 post.</li>
